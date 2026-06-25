@@ -35,14 +35,23 @@ use G8Scope\Core\Reporting\FilesystemReportGenerator;
 use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 use G8Scope\Core\Stores\EloquentIssueStore;
 use G8Scope\Core\Support\G8DeskSupportProvider;
-use Illuminate\Support\ServiceProvider;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class G8ScopeCoreServiceProvider extends ServiceProvider
+class G8ScopeCoreServiceProvider extends PackageServiceProvider
 {
-    public function register(): void
+    public function configurePackage(Package $package): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/g8scope.php', 'g8scope');
+        // spatie/laravel-package-tools: config/g8scope.php (tag g8scope-config) +
+        // auto-discovered, publishable, auto-run migrations from database/migrations.
+        $package
+            ->name('g8scope')
+            ->hasConfigFile()
+            ->discoversMigrations();
+    }
 
+    public function packageRegistered(): void
+    {
         $this->bindFingerprinter();
         $this->bindDriver(Scrubber::class, 'scrubber', fn () => new PiiProtectionScrubber);
         $this->bindDriver(IssueStore::class, 'issue_store', fn () => new EloquentIssueStore);
@@ -65,18 +74,12 @@ class G8ScopeCoreServiceProvider extends ServiceProvider
         );
     }
 
-    public function boot(): void
+    public function packageBooted(): void
     {
         Project::observe(ProjectObserver::class);
 
-        // Auto-load migrations so a consuming app gets the schema without copying.
+        // Ensure migrations load for consumers and tests (not just publishable).
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../config/g8scope.php' => config_path('g8scope.php'),
-            ], 'g8scope-config');
-        }
     }
 
     /**

@@ -1,0 +1,175 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method G8Scope\\Core\\Actions\\GenerateReport\:\:__invoke\(\) should return G8Scope\\Core\\Models\\Report but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Actions/GenerateReport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Project\:\:\$account_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Actions/InviteMember.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$project_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/OpenIncident.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$fingerprint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/RequestSupport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$message\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/RequestSupport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$project_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/RequestSupport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/RequestSupport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Actions/RequestSupport.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Incident\:\:\$opened_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/ResolveIncident.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Project\:\:\$account_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Actions/SwitchEndpoint.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$message\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Alerting/AlertDispatcher.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Alerting/AlertDispatcher.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Alerting/AlertDispatcher.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:alertRules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Alerting/AlertDispatcher.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$apiEndpoint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Endpoints/DefaultEndpointResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$mcpEndpoint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Endpoints/DefaultEndpointResolver.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$custom_api\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Entitlement/EloquentEntitlementGate.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$custom_mcp\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Entitlement/EloquentEntitlementGate.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$seats\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Entitlement/EloquentEntitlementGate.php
+
+		-
+			message: '#^Match arm comparison between ''custom_mcp'' and ''custom_mcp'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: src/Entitlement/EloquentEntitlementGate.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>seats" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Entitlement/EloquentEntitlementGate.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$granted_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Entitlement.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\IngestKey\:\:\$revoked_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/IngestKey.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Project\:\:\$account_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Observers/ProjectObserver.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Privacy/PiiProtectionScrubber.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$last_seen_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Stores/EloquentIssueStore.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$occurrences_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Stores/EloquentIssueStore.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$resolved_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Stores/EloquentIssueStore.php
+
+		-
+			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Stores/EloquentIssueStore.php

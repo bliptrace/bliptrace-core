@@ -1,0 +1,82 @@
+name: run-tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: g8scope
+          POSTGRES_PASSWORD: g8scope
+          POSTGRES_DB: g8scope_core_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U g8scope -d g8scope_core_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+      clickhouse:
+        image: clickhouse/clickhouse-server:24-alpine
+        env:
+          CLICKHOUSE_USER: g8scope
+          CLICKHOUSE_PASSWORD: g8scope
+          CLICKHOUSE_DB: g8scope_core_test
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd "wget --spider -q http://127.0.0.1:8123/ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      G8SCOPE_PG_HOST: 127.0.0.1
+      G8SCOPE_PG_PORT: 5432
+      G8SCOPE_CH_HOST: 127.0.0.1
+      G8SCOPE_CH_PORT: 8123
+
+    steps:
+      # Multi-repo: core depends on g8scope-contracts via a sibling path repository,
+      # so check both out side by side. GH_PAT must grant read on the private
+      # contracts repo (a fine-grained PAT or org token).
+      - name: Checkout core
+        uses: actions/checkout@v4
+        with:
+          path: g8scope-core
+
+      - name: Checkout contracts (path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: developers-hub-my/g8scope-contracts
+          path: g8scope-contracts
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: pdo, pdo_pgsql
+          coverage: none
+
+      - name: Install dependencies
+        working-directory: g8scope-core
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Pint (code style)
+        working-directory: g8scope-core
+        run: composer lint
+
+      - name: PHPStan (static analysis)
+        working-directory: g8scope-core
+        run: composer analyse
+
+      - name: Pest (tests against real PG + ClickHouse)
+        working-directory: g8scope-core
+        run: composer test
