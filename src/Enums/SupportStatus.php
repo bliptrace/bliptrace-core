@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace G8Scope\Core\Enums;
 
+use CleaniqueCoders\Traitify\Concerns\InteractsWithEnum;
+use CleaniqueCoders\Traitify\Contracts\Enum;
+
 /** g8desk support link status (spec §15). Mirrors g8desk's flow. */
-enum SupportStatus: string
+enum SupportStatus: string implements Enum
 {
+    use InteractsWithEnum;
+
+    public function description(): string
+    {
+        return $this->label();
+    }
+
     case Open = 'open';
     case InProgress = 'in_progress';
     case PendingClient = 'pending_client';

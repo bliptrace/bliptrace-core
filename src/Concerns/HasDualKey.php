@@ -4,28 +4,17 @@ declare(strict_types=1);
 
 namespace G8Scope\Core\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use CleaniqueCoders\Traitify\Concerns\InteractsWithUuid;
 
 /**
  * Dual ID convention (spec §17): a bigint auto-increment `id` for internal
- * relations + a UUID `uuid` for public-facing identifiers. Route-binds on uuid.
+ * relations + a UUID `uuid` for public-facing identifiers (route-bound on uuid).
  *
- * @mixin Model
+ * Composes cleaniquecoders/traitify's InteractsWithUuid for the uuid behaviour
+ * (autofill on create, getRouteKeyName, scopeUuid) — the bigint `id` is Eloquent's
+ * default key. Kept as a named trait so models read as "dual key" per the spec.
  */
 trait HasDualKey
 {
-    public static function bootHasDualKey(): void
-    {
-        static::creating(function (Model $model): void {
-            if (empty($model->getAttribute('uuid'))) {
-                $model->setAttribute('uuid', (string) Str::uuid());
-            }
-        });
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'uuid';
-    }
+    use InteractsWithUuid;
 }

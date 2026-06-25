@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace G8Scope\Core\Enums;
 
+use CleaniqueCoders\Traitify\Concerns\InteractsWithEnum;
+use CleaniqueCoders\Traitify\Contracts\Enum;
+
 /** Issue lifecycle (spec §5): open / resolve / reopen / mute / ack. */
-enum IssueStatus: string
+enum IssueStatus: string implements Enum
 {
+    use InteractsWithEnum;
+
+    public function description(): string
+    {
+        return $this->label();
+    }
+
     case Open = 'open';
     case Resolved = 'resolved';
     case Muted = 'muted';

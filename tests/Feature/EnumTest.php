@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use CleaniqueCoders\Traitify\Contracts\Enum;
 use G8Scope\Core\Enums\EndpointType;
 use G8Scope\Core\Enums\Environment;
 use G8Scope\Core\Enums\IssueStatus;
@@ -32,3 +33,10 @@ it('has the expected issue lifecycle states', function (): void {
         ->and(IssueStatus::Open->color())->toBe('red')
         ->and(ProjectRole::Owner->label())->toBe('Owner');
 });
+
+it('implements the traitify Enum contract (values/labels/options)', function (string $enum): void {
+    expect(is_a($enum, Enum::class, true))->toBeTrue()
+        ->and($enum::values())->toBeArray()->not->toBeEmpty()
+        ->and($enum::labels())->toBeArray()->not->toBeEmpty()
+        ->and($enum::options())->toBeArray()->not->toBeEmpty();
+})->with('enums');
