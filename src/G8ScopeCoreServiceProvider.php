@@ -13,6 +13,7 @@ use G8Scope\Core\Contracts\EndpointResolver;
 use G8Scope\Core\Contracts\EntitlementGate;
 use G8Scope\Core\Contracts\Fingerprinter;
 use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Contracts\MetricStore;
 use G8Scope\Core\Contracts\Notifier;
 use G8Scope\Core\Contracts\OccurrenceStore;
 use G8Scope\Core\Contracts\OccurrenceWriter;
@@ -27,6 +28,7 @@ use G8Scope\Core\Fingerprinting\Normalizers\GoNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\PhpNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\PythonNormalizer;
+use G8Scope\Core\Metrics\EloquentMetricStore;
 use G8Scope\Core\Models\Project;
 use G8Scope\Core\Notifications\ChannelNotifier;
 use G8Scope\Core\Notifications\Channels\MailChannel;
@@ -66,6 +68,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         $this->bindDriver(EntitlementGate::class, 'entitlement_gate', fn () => new EloquentEntitlementGate);
         $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
         $this->bindDriver(ApmStore::class, 'apm_store', fn () => new EloquentApmStore);
+        $this->bindDriver(MetricStore::class, 'metric_store', fn () => new EloquentMetricStore);
         $this->bindDriver(EndpointResolver::class, 'endpoint_resolver', fn () => new DefaultEndpointResolver);
         $this->bindDriver(ReportGenerator::class, 'report_generator', fn () => new FilesystemReportGenerator);
         $this->bindDriver(
