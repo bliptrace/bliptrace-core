@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace G8Scope\Core;
 
 use G8Scope\Core\Alerting\AlertDispatcher;
+use G8Scope\Core\Apm\EloquentApmStore;
 use G8Scope\Core\Billing\ManualBillingProvider;
+use G8Scope\Core\Contracts\ApmStore;
 use G8Scope\Core\Contracts\BillingProvider;
 use G8Scope\Core\Contracts\EndpointResolver;
 use G8Scope\Core\Contracts\EntitlementGate;
@@ -63,6 +65,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         // P2 seams.
         $this->bindDriver(EntitlementGate::class, 'entitlement_gate', fn () => new EloquentEntitlementGate);
         $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
+        $this->bindDriver(ApmStore::class, 'apm_store', fn () => new EloquentApmStore);
         $this->bindDriver(EndpointResolver::class, 'endpoint_resolver', fn () => new DefaultEndpointResolver);
         $this->bindDriver(ReportGenerator::class, 'report_generator', fn () => new FilesystemReportGenerator);
         $this->bindDriver(
