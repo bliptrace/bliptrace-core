@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+// Standard owen-it/laravel-auditing audits table (audit log foundation, spec §18).
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('audits', function (Blueprint $table): void {
+            $table->id();
+            $table->string('user_type')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('event');
+            $table->morphs('auditable');
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
+            $table->text('url')->nullable();
+            $table->ipAddress('ip_address')->nullable();
+            $table->string('user_agent', 1023)->nullable();
+            $table->string('tags')->nullable();
+            $table->timestamps();
+
+            $table->index(['user_id', 'user_type']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('audits');
+    }
+};

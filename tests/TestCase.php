@@ -42,6 +42,10 @@ class TestCase extends Orchestra
             'sslmode' => 'prefer',
         ]);
 
+        // owen-it/laravel-auditing skips auditing in console by default; tests run
+        // in console, so enable it here.
+        $app['config']->set('audit.console', true);
+
         // --- ClickHouse (occurrences) — consumed by the OccurrenceStore driver ---
         $app['config']->set('g8scope.clickhouse', [
             'host' => env('G8SCOPE_CH_HOST', '127.0.0.1'),
