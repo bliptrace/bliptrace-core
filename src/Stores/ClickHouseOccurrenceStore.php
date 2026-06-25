@@ -87,6 +87,17 @@ class ClickHouseOccurrenceStore implements OccurrenceStore, OccurrenceWriter
         )->rows();
     }
 
+    /** Total occurrences for a project release — used by ReleaseHealth (spec §8). */
+    public function countForRelease(int $projectId, string $release): int
+    {
+        $row = $this->client->select(
+            'SELECT count() AS c FROM '.self::TABLE.' WHERE project_id = :p AND release = :r',
+            ['p' => $projectId, 'r' => $release]
+        )->fetchOne();
+
+        return (int) ($row['c'] ?? 0);
+    }
+
     public function sparkline(string $issueUuid, string $interval = '1h'): array
     {
         $bucket = match ($interval) {

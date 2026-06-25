@@ -19,8 +19,10 @@ use G8scope\Core\Endpoints\DefaultEndpointResolver;
 use G8scope\Core\Entitlement\EloquentEntitlementGate;
 use G8scope\Core\Fingerprinting\DefaultFingerprinter;
 use G8scope\Core\Fingerprinting\NormalizerRegistry;
+use G8scope\Core\Fingerprinting\Normalizers\GoNormalizer;
 use G8scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
 use G8scope\Core\Fingerprinting\Normalizers\PhpNormalizer;
+use G8scope\Core\Fingerprinting\Normalizers\PythonNormalizer;
 use G8scope\Core\Models\Project;
 use G8scope\Core\Notifications\ChannelNotifier;
 use G8scope\Core\Notifications\Channels\MailChannel;
@@ -97,6 +99,8 @@ class G8scopeCoreServiceProvider extends ServiceProvider
         $this->app->singleton(NormalizerRegistry::class, fn () => new NormalizerRegistry([
             new PhpNormalizer,
             new JavascriptNormalizer,
+            new PythonNormalizer,
+            new GoNormalizer,
         ]));
 
         $this->bindDriver(
