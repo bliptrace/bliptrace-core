@@ -69,14 +69,13 @@ class G8ScopeCoreServiceProvider extends ServiceProvider
     {
         Project::observe(ProjectObserver::class);
 
+        // Auto-load migrations so a consuming app gets the schema without copying.
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/g8scope.php' => config_path('g8scope.php'),
             ], 'g8scope-config');
-
-            $this->publishes([
-                __DIR__.'/../database/migrations' => database_path('migrations'),
-            ], 'g8scope-migrations');
         }
     }
 
