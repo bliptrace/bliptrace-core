@@ -23,4 +23,13 @@ return [
 
     // Default retention in days for the shared tier (illustrative — set during pricing).
     'retention_days' => 14,
+
+    // ClickHouse connection for the OccurrenceStore driver (occurrences live in CH).
+    'clickhouse' => [
+        'host' => env('G8SCOPE_CH_HOST', '127.0.0.1'),
+        'port' => (int) env('G8SCOPE_CH_PORT', 8123),
+        'username' => env('G8SCOPE_CH_USER', 'default'),
+        'password' => env('G8SCOPE_CH_PASS', ''),
+        'database' => env('G8SCOPE_CH_DB', 'g8scope'),
+    ],
 ];
