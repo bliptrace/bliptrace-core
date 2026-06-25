@@ -34,7 +34,7 @@ use G8Scope\Core\Privacy\PiiProtectionScrubber;
 use G8Scope\Core\Reporting\FilesystemReportGenerator;
 use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 use G8Scope\Core\Stores\EloquentIssueStore;
-use G8Scope\Core\Support\G8deskSupportProvider;
+use G8Scope\Core\Support\G8DeskSupportProvider;
 use Illuminate\Support\ServiceProvider;
 
 class G8ScopeCoreServiceProvider extends ServiceProvider
@@ -56,7 +56,7 @@ class G8ScopeCoreServiceProvider extends ServiceProvider
         $this->bindDriver(
             SupportProvider::class,
             'support_provider',
-            fn () => G8deskSupportProvider::fromConfig((array) config('g8scope.g8desk', [])),
+            fn () => G8DeskSupportProvider::fromConfig((array) config('g8scope.g8desk', [])),
         );
 
         $this->app->singleton(

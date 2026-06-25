@@ -13,7 +13,7 @@ use RuntimeException;
  * ticket from an already-scrubbed issue context and returns its reference
  * (DESK-YYYY-NNNNN). PII must be scrubbed by the caller before reaching here.
  */
-class G8deskSupportProvider implements SupportProvider
+class G8DeskSupportProvider implements SupportProvider
 {
     public function __construct(
         private readonly string $baseUrl,
