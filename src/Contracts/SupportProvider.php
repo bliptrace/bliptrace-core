@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * Pluggable support backend (spec §15). g8desk is the first driver. Attaches a

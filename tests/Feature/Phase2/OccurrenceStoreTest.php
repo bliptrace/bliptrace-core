@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Contracts\OccurrenceStore;
-use G8scope\Core\Contracts\OccurrenceWriter;
+use G8Scope\Core\Contracts\OccurrenceStore;
+use G8Scope\Core\Contracts\OccurrenceWriter;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {

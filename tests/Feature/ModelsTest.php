@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Enums\Level;
-use G8scope\Core\Enums\ProjectRole;
-use G8scope\Core\Models\Account;
-use G8scope\Core\Models\Entitlement;
-use G8scope\Core\Models\IngestKey;
-use G8scope\Core\Models\Issue;
-use G8scope\Core\Models\Membership;
-use G8scope\Core\Models\Project;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Enums\Level;
+use G8Scope\Core\Enums\ProjectRole;
+use G8Scope\Core\Models\Account;
+use G8Scope\Core\Models\Entitlement;
+use G8Scope\Core\Models\IngestKey;
+use G8Scope\Core\Models\Issue;
+use G8Scope\Core\Models\Membership;
+use G8Scope\Core\Models\Project;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;

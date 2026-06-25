@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Enums;
+namespace G8Scope\Core\Enums;
 
 /** Issue lifecycle (spec §5): open / resolve / reopen / mute / ack. */
 enum IssueStatus: string

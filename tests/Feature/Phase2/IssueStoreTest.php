@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Contracts\IssueStore;
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Models\Account;
+use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

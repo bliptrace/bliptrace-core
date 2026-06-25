@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Contracts\Scrubber;
 
 beforeEach(function (): void {
     $this->scrubber = app(Scrubber::class);

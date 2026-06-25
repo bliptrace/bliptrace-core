@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Observers;
+namespace G8Scope\Core\Observers;
 
-use G8scope\Core\Models\Endpoint;
-use G8scope\Core\Models\IngestKey;
-use G8scope\Core\Models\Project;
-use G8scope\Core\Models\ProjectBinding;
+use G8Scope\Core\Models\Endpoint;
+use G8Scope\Core\Models\IngestKey;
+use G8Scope\Core\Models\Project;
+use G8Scope\Core\Models\ProjectBinding;
 use Illuminate\Support\Str;
 
 /**

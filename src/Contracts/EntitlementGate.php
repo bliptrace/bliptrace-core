@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * Account-level entitlement gate (spec §13). Checks permanent capability flags

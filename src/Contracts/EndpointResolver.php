@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * Resolves the endpoint URL a project uses for a given kind (api|mcp): the bound

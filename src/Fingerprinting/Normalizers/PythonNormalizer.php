@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting\Normalizers;
+namespace G8Scope\Core\Fingerprinting\Normalizers;
 
 /** Python stack normaliser: anchor at the app, drop site-packages/venv prefixes. */
 class PythonNormalizer extends GenericNormalizer

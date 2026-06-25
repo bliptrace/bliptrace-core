@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Models\Incident;
+use G8Scope\Core\Models\Incident;
 
 /** Resolve an incident and compute MTTR in seconds (spec §7, P2). */
 class ResolveIncident

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Enums;
+namespace G8Scope\Core\Enums;
 
 /** g8desk support link status (spec §15). Mirrors g8desk's flow. */
 enum SupportStatus: string

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Stores;
+namespace G8Scope\Core\Stores;
 
 use ClickHouseDB\Client;
-use G8scope\Core\Contracts\OccurrenceStore;
-use G8scope\Core\Contracts\OccurrenceWriter;
+use G8Scope\Core\Contracts\OccurrenceStore;
+use G8Scope\Core\Contracts\OccurrenceWriter;
 
 /**
  * Occurrences in ClickHouse (spec §8): append-only, one issue groups thousands.

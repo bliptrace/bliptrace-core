@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Enums\EndpointType;
-use G8scope\Core\Enums\Environment;
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Enums\Level;
-use G8scope\Core\Enums\ProjectRole;
-use G8scope\Core\Enums\ReportType;
-use G8scope\Core\Enums\SupportStatus;
+use G8Scope\Core\Enums\EndpointType;
+use G8Scope\Core\Enums\Environment;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Enums\Level;
+use G8Scope\Core\Enums\ProjectRole;
+use G8Scope\Core\Enums\ReportType;
+use G8Scope\Core\Enums\SupportStatus;
 
 dataset('enums', [
     [IssueStatus::class],

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Endpoints;
+namespace G8Scope\Core\Endpoints;
 
-use G8scope\Core\Contracts\EndpointResolver;
-use G8scope\Core\Enums\EndpointType;
-use G8scope\Core\Models\Project;
+use G8Scope\Core\Contracts\EndpointResolver;
+use G8Scope\Core\Enums\EndpointType;
+use G8Scope\Core\Models\Project;
 
 /**
  * Resolves the endpoint URL a project uses for a given kind (api|mcp): the bound

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Alerting\AlertDispatcher;
-use G8scope\Core\Contracts\Fingerprinter;
-use G8scope\Core\Contracts\IssueStore;
-use G8scope\Core\Contracts\OccurrenceWriter;
-use G8scope\Core\Contracts\Scrubber;
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Alerting\AlertDispatcher;
+use G8Scope\Core\Contracts\Fingerprinter;
+use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Contracts\OccurrenceWriter;
+use G8Scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Models\Issue;
 
 /**
  * Invokable Action: scrub → fingerprint → upsert issue (PG) → record occurrence

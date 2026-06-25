@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Tests\TestCase;
+use G8Scope\Core\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');

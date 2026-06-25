@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Events;
+namespace G8Scope\Core\Events;
 
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Models\Issue;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class AlertDispatched

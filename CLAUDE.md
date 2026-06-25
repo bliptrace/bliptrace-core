@@ -42,7 +42,7 @@ Tests run on **Orchestra Testbench** with SQLite `:memory:`.
 - **PII scrub before anything is stored, returned, or sent to g8desk** — the `Scrubber` runs first
   (`cleaniquecoders/pii-protection` in the app binding).
 - **Pest** for tests; British spelling; lowercase `g8` prefix; `declare(strict_types=1)` in every file.
-- Namespace `G8scope\Core\`; package name `g8scope/core`.
+- Namespace `G8Scope\Core\`; package name `g8scope/core`.
 
 ## The contracts (driver seams) — what each owns
 

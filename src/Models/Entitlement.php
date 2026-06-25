@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Models;
+namespace G8Scope\Core\Models;
 
-use G8scope\Core\Concerns\HasDualKey;
+use G8Scope\Core\Concerns\HasDualKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Auditable as AuditableTrait;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting\Normalizers;
+namespace G8Scope\Core\Fingerprinting\Normalizers;
 
 /** Go stack normaliser: strip module versions and the module cache path. */
 class GoNormalizer extends GenericNormalizer

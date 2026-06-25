@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Models\Incident;
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Models\Incident;
+use G8Scope\Core\Models\Issue;
 
 /** Open an incident for an issue (spec §7, P2). Idempotent per open issue. */
 class OpenIncident

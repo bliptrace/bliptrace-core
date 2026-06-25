@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Models;
+namespace G8Scope\Core\Models;
 
-use G8scope\Core\Concerns\HasDualKey;
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Enums\Level;
+use G8Scope\Core\Concerns\HasDualKey;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Enums\Level;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

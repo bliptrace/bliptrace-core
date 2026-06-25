@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Privacy;
+namespace G8Scope\Core\Privacy;
 
 use CleaniqueCoders\PiiProtection\Detection\PiiScrubber;
-use G8scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Contracts\Scrubber;
 
 /**
  * PII scrubber (spec §17/§18). Two layers:

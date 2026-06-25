@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Alerting\Strategies;
+namespace G8Scope\Core\Alerting\Strategies;
 
-use G8scope\Core\Contracts\AlertStrategy;
+use G8Scope\Core\Contracts\AlertStrategy;
 
 /**
  * SLO burn-rate (spec §7, P3). burn = observed_error_rate / error_budget, where

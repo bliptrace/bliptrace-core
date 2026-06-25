@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting\Normalizers;
+namespace G8Scope\Core\Fingerprinting\Normalizers;
 
 /**
  * JavaScript stack normaliser: strip origin/host, cache-busting hashes and query

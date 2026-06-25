@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Entitlement;
+namespace G8Scope\Core\Entitlement;
 
-use G8scope\Core\Contracts\EntitlementGate;
-use G8scope\Core\Models\Entitlement;
-use G8scope\Core\Models\Membership;
-use G8scope\Core\Models\Project;
+use G8Scope\Core\Contracts\EntitlementGate;
+use G8Scope\Core\Models\Entitlement;
+use G8Scope\Core\Models\Membership;
+use G8Scope\Core\Models\Project;
 
 /**
  * Account-level entitlement gate (spec §13). One-time, permanent capability flags

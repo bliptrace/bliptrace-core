@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting\Normalizers;
+namespace G8Scope\Core\Fingerprinting\Normalizers;
 
-use G8scope\Core\Contracts\Normalizer;
+use G8Scope\Core\Contracts\Normalizer;
 
 /** Fallback normaliser for runtimes without a dedicated one. */
 class GenericNormalizer implements Normalizer

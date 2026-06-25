@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * Occurrence access in ClickHouse (spec §8). Append-only; the web app reads,

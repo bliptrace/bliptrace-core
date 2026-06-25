@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Notifications;
+namespace G8Scope\Core\Notifications;
 
 interface NotificationChannel
 {

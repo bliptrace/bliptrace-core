@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Support;
+namespace G8Scope\Core\Support;
 
-use G8scope\Core\Contracts\SupportProvider;
+use G8Scope\Core\Contracts\SupportProvider;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting;
+namespace G8Scope\Core\Fingerprinting;
 
-use G8scope\Core\Contracts\Normalizer;
-use G8scope\Core\Fingerprinting\Normalizers\GenericNormalizer;
+use G8Scope\Core\Contracts\Normalizer;
+use G8Scope\Core\Fingerprinting\Normalizers\GenericNormalizer;
 
 /** Selects a Normalizer by runtime name, falling back to the generic one. */
 class NormalizerRegistry

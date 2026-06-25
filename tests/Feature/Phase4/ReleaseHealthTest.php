@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Analytics\ReleaseHealth;
-use G8scope\Core\Models\Account;
-use G8scope\Core\Stores\ClickHouseOccurrenceStore;
+use G8Scope\Core\Analytics\ReleaseHealth;
+use G8Scope\Core\Models\Account;
+use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 

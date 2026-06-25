@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "G8scope\\Core\\": "src/"
+            "G8Scope\\Core\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "G8scope\\Core\\Tests\\": "tests/"
+            "G8Scope\\Core\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -35,7 +35,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "G8scope\\Core\\G8scopeCoreServiceProvider"
+                "G8Scope\\Core\\G8ScopeCoreServiceProvider"
             ]
         }
     },

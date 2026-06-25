@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Concerns\HasDualKey;
+use G8Scope\Core\Concerns\HasDualKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 

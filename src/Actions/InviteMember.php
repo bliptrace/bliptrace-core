@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Contracts\EntitlementGate;
-use G8scope\Core\Enums\ProjectRole;
-use G8scope\Core\Exceptions\SeatLimitException;
-use G8scope\Core\Models\Membership;
-use G8scope\Core\Models\Project;
+use G8Scope\Core\Contracts\EntitlementGate;
+use G8Scope\Core\Enums\ProjectRole;
+use G8Scope\Core\Exceptions\SeatLimitException;
+use G8Scope\Core\Models\Membership;
+use G8Scope\Core\Models\Project;
 
 /**
  * Invite a user to a project (spec §6, §18). A brand-new user (not yet a member of

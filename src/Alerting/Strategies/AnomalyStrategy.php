@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Alerting\Strategies;
+namespace G8Scope\Core\Alerting\Strategies;
 
-use G8scope\Core\Contracts\AlertStrategy;
+use G8Scope\Core\Contracts\AlertStrategy;
 
 /**
  * Dynamic-baseline anomaly detection (spec §7, P3). Fire when the current value is

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Stores;
+namespace G8Scope\Core\Stores;
 
-use G8scope\Core\Contracts\IssueStore;
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Models\Issue;
 use Illuminate\Support\Facades\DB;
 
 /**

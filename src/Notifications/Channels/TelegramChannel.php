@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Notifications\Channels;
+namespace G8Scope\Core\Notifications\Channels;
 
-use G8scope\Core\Notifications\NotificationChannel;
+use G8Scope\Core\Notifications\NotificationChannel;
 use Illuminate\Support\Facades\Http;
 
 class TelegramChannel implements NotificationChannel

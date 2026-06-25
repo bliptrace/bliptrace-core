@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
-use G8scope\Core\Enums\ReportType;
+use G8Scope\Core\Enums\ReportType;
 
 /**
  * Generates a report snapshot from CH + PG (spec §16). pdf / csv drivers.

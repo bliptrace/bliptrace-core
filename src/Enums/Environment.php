@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Enums;
+namespace G8Scope\Core\Enums;
 
 /** Deployment environment of the monitored app. */
 enum Environment: string

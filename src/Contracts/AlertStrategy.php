@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * A pluggable alerting strategy (spec §7, P3): given a metrics snapshot, decide

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Alerting\Strategies\AnomalyStrategy;
-use G8scope\Core\Alerting\Strategies\SloBurnRateStrategy;
+use G8Scope\Core\Alerting\Strategies\AnomalyStrategy;
+use G8Scope\Core\Alerting\Strategies\SloBurnRateStrategy;
 
 it('fires SLO burn-rate above threshold', function (): void {
     $s = new SloBurnRateStrategy(threshold: 2.0);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Models\Account;
+use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

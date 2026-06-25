@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Fingerprinting;
+namespace G8Scope\Core\Fingerprinting;
 
-use G8scope\Core\Contracts\Fingerprinter;
+use G8Scope\Core\Contracts\Fingerprinter;
 
 /**
  * Default fingerprint (spec §11): hash of project_id + exception.type + normalised

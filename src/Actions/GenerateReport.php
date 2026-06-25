@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Contracts\ReportGenerator;
-use G8scope\Core\Enums\ReportType;
-use G8scope\Core\Models\Project;
-use G8scope\Core\Models\Report;
+use G8Scope\Core\Contracts\ReportGenerator;
+use G8Scope\Core\Enums\ReportType;
+use G8Scope\Core\Models\Project;
+use G8Scope\Core\Models\Report;
 
 /** Generate a report artifact and record it (spec §16, §18). */
 class GenerateReport

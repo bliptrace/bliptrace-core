@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Enums;
+namespace G8Scope\Core\Enums;
 
 /** RBAC roles (spec §14). */
 enum ProjectRole: string

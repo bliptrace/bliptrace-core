@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Analytics;
+namespace G8Scope\Core\Analytics;
 
-use G8scope\Core\Models\Issue;
-use G8scope\Core\Stores\ClickHouseOccurrenceStore;
+use G8Scope\Core\Models\Issue;
+use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 
 /**
  * Compare error health across two releases (spec §8, P3): new issues introduced and

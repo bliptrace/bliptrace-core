@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
 /**
  * Multi-channel alert dispatch (spec §7, §18): email / Slack / Telegram / webhook.

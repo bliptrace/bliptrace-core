@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Contracts;
+use G8Scope\Core\Contracts;
 
 dataset('contracts', [
     Contracts\Fingerprinter::class,

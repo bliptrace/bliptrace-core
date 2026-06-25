@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Actions;
+namespace G8Scope\Core\Actions;
 
-use G8scope\Core\Contracts\Scrubber;
-use G8scope\Core\Contracts\SupportProvider;
-use G8scope\Core\Models\Issue;
-use G8scope\Core\Models\SupportLink;
+use G8Scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Contracts\SupportProvider;
+use G8Scope\Core\Models\Issue;
+use G8Scope\Core\Models\SupportLink;
 
 /**
  * Request support for an issue (spec §15): scrub the issue context, attach it to a

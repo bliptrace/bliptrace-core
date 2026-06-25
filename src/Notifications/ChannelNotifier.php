@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Notifications;
+namespace G8Scope\Core\Notifications;
 
-use G8scope\Core\Contracts\Notifier;
+use G8Scope\Core\Contracts\Notifier;
 use InvalidArgumentException;
 
 /**

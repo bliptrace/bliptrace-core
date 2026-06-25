@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Enums;
+namespace G8Scope\Core\Enums;
 
 /** Endpoint isolation type (spec §12): shared multi-tenant vs dedicated. */
 enum EndpointType: string

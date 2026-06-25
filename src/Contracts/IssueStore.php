@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Contracts;
+namespace G8Scope\Core\Contracts;
 
-use G8scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Enums\IssueStatus;
 
 /**
  * Issue persistence in Postgres (spec §8). Dedup is an upsert

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Concerns;
+namespace G8Scope\Core\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

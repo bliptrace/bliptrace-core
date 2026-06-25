@@ -10,10 +10,10 @@ declare(strict_types=1);
  */
 return [
     'drivers' => [
-        'fingerprinter' => null,   // implements G8scope\Core\Contracts\Fingerprinter
-        'scrubber' => null,        // implements G8scope\Core\Contracts\Scrubber
-        'issue_store' => null,     // implements G8scope\Core\Contracts\IssueStore (Postgres)
-        'occurrence_store' => null, // implements G8scope\Core\Contracts\OccurrenceStore (ClickHouse)
+        'fingerprinter' => null,   // implements G8Scope\Core\Contracts\Fingerprinter
+        'scrubber' => null,        // implements G8Scope\Core\Contracts\Scrubber
+        'issue_store' => null,     // implements G8Scope\Core\Contracts\IssueStore (Postgres)
+        'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (ClickHouse)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
         'support_provider' => null,

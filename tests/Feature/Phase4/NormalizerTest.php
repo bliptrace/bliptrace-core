@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Contracts\Fingerprinter;
+use G8Scope\Core\Contracts\Fingerprinter;
 
 beforeEach(fn () => $this->fp = app(Fingerprinter::class));
 

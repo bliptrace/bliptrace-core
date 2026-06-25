@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Tests;
+namespace G8Scope\Core\Tests;
 
-use G8scope\Core\G8scopeCoreServiceProvider;
+use G8Scope\Core\G8ScopeCoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use OwenIt\Auditing\AuditingServiceProvider;
 
@@ -21,7 +21,7 @@ class TestCase extends Orchestra
     {
         return [
             AuditingServiceProvider::class,
-            G8scopeCoreServiceProvider::class,
+            G8ScopeCoreServiceProvider::class,
         ];
     }
 

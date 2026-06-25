@@ -2,42 +2,42 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core;
+namespace G8Scope\Core;
 
-use G8scope\Core\Alerting\AlertDispatcher;
-use G8scope\Core\Contracts\EndpointResolver;
-use G8scope\Core\Contracts\EntitlementGate;
-use G8scope\Core\Contracts\Fingerprinter;
-use G8scope\Core\Contracts\IssueStore;
-use G8scope\Core\Contracts\Notifier;
-use G8scope\Core\Contracts\OccurrenceStore;
-use G8scope\Core\Contracts\OccurrenceWriter;
-use G8scope\Core\Contracts\ReportGenerator;
-use G8scope\Core\Contracts\Scrubber;
-use G8scope\Core\Contracts\SupportProvider;
-use G8scope\Core\Endpoints\DefaultEndpointResolver;
-use G8scope\Core\Entitlement\EloquentEntitlementGate;
-use G8scope\Core\Fingerprinting\DefaultFingerprinter;
-use G8scope\Core\Fingerprinting\NormalizerRegistry;
-use G8scope\Core\Fingerprinting\Normalizers\GoNormalizer;
-use G8scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
-use G8scope\Core\Fingerprinting\Normalizers\PhpNormalizer;
-use G8scope\Core\Fingerprinting\Normalizers\PythonNormalizer;
-use G8scope\Core\Models\Project;
-use G8scope\Core\Notifications\ChannelNotifier;
-use G8scope\Core\Notifications\Channels\MailChannel;
-use G8scope\Core\Notifications\Channels\SlackChannel;
-use G8scope\Core\Notifications\Channels\TelegramChannel;
-use G8scope\Core\Notifications\Channels\WebhookChannel;
-use G8scope\Core\Observers\ProjectObserver;
-use G8scope\Core\Privacy\PiiProtectionScrubber;
-use G8scope\Core\Reporting\FilesystemReportGenerator;
-use G8scope\Core\Stores\ClickHouseOccurrenceStore;
-use G8scope\Core\Stores\EloquentIssueStore;
-use G8scope\Core\Support\G8deskSupportProvider;
+use G8Scope\Core\Alerting\AlertDispatcher;
+use G8Scope\Core\Contracts\EndpointResolver;
+use G8Scope\Core\Contracts\EntitlementGate;
+use G8Scope\Core\Contracts\Fingerprinter;
+use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Contracts\Notifier;
+use G8Scope\Core\Contracts\OccurrenceStore;
+use G8Scope\Core\Contracts\OccurrenceWriter;
+use G8Scope\Core\Contracts\ReportGenerator;
+use G8Scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Contracts\SupportProvider;
+use G8Scope\Core\Endpoints\DefaultEndpointResolver;
+use G8Scope\Core\Entitlement\EloquentEntitlementGate;
+use G8Scope\Core\Fingerprinting\DefaultFingerprinter;
+use G8Scope\Core\Fingerprinting\NormalizerRegistry;
+use G8Scope\Core\Fingerprinting\Normalizers\GoNormalizer;
+use G8Scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
+use G8Scope\Core\Fingerprinting\Normalizers\PhpNormalizer;
+use G8Scope\Core\Fingerprinting\Normalizers\PythonNormalizer;
+use G8Scope\Core\Models\Project;
+use G8Scope\Core\Notifications\ChannelNotifier;
+use G8Scope\Core\Notifications\Channels\MailChannel;
+use G8Scope\Core\Notifications\Channels\SlackChannel;
+use G8Scope\Core\Notifications\Channels\TelegramChannel;
+use G8Scope\Core\Notifications\Channels\WebhookChannel;
+use G8Scope\Core\Observers\ProjectObserver;
+use G8Scope\Core\Privacy\PiiProtectionScrubber;
+use G8Scope\Core\Reporting\FilesystemReportGenerator;
+use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
+use G8Scope\Core\Stores\EloquentIssueStore;
+use G8Scope\Core\Support\G8deskSupportProvider;
 use Illuminate\Support\ServiceProvider;
 
-class G8scopeCoreServiceProvider extends ServiceProvider
+class G8ScopeCoreServiceProvider extends ServiceProvider
 {
     public function register(): void
     {

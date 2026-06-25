@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Alerting;
+namespace G8Scope\Core\Alerting;
 
-use G8scope\Core\Contracts\Notifier;
-use G8scope\Core\Events\AlertDispatched;
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Contracts\Notifier;
+use G8Scope\Core\Events\AlertDispatched;
+use G8Scope\Core\Models\Issue;
 
 /**
  * Decides when to alert (spec §7). Smart grouping is structural: an alert fires

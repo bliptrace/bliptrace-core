@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace G8scope\Core\Reporting;
+namespace G8Scope\Core\Reporting;
 
-use G8scope\Core\Contracts\ReportGenerator;
-use G8scope\Core\Enums\ReportType;
-use G8scope\Core\Models\Issue;
+use G8Scope\Core\Contracts\ReportGenerator;
+use G8Scope\Core\Enums\ReportType;
+use G8Scope\Core\Models\Issue;
 use Illuminate\Support\Facades\Storage;
 
 /**

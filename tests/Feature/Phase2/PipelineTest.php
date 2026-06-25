@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Actions\RecordOccurrence;
-use G8scope\Core\Contracts\OccurrenceStore;
-use G8scope\Core\Models\Account;
+use G8Scope\Core\Actions\RecordOccurrence;
+use G8Scope\Core\Contracts\OccurrenceStore;
+use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 

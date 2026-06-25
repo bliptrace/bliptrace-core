@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use G8scope\Core\Alerting\AlertDispatcher;
-use G8scope\Core\Contracts\IssueStore;
-use G8scope\Core\Contracts\Notifier;
-use G8scope\Core\Enums\IssueStatus;
-use G8scope\Core\Models\Account;
+use G8Scope\Core\Alerting\AlertDispatcher;
+use G8Scope\Core\Contracts\IssueStore;
+use G8Scope\Core\Contracts\Notifier;
+use G8Scope\Core\Enums\IssueStatus;
+use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 
