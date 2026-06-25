@@ -30,6 +30,14 @@ return [
         'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com'),
     ],
 
+    // g8desk support integration (SupportProvider driver) — spec §15.
+    'g8desk' => [
+        'base_url' => env('G8SCOPE_G8DESK_URL', ''),
+        'token' => env('G8SCOPE_G8DESK_TOKEN'),
+        'organization' => env('G8SCOPE_G8DESK_ORG'),
+        'product' => env('G8SCOPE_G8DESK_PRODUCT'),
+    ],
+
     // ClickHouse connection for the OccurrenceStore driver (occurrences live in CH).
     'clickhouse' => [
         'host' => env('G8SCOPE_CH_HOST', '127.0.0.1'),

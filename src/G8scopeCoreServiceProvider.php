@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace G8scope\Core;
 
 use G8scope\Core\Alerting\AlertDispatcher;
+use G8scope\Core\Contracts\EndpointResolver;
+use G8scope\Core\Contracts\EntitlementGate;
 use G8scope\Core\Contracts\Fingerprinter;
 use G8scope\Core\Contracts\IssueStore;
 use G8scope\Core\Contracts\Notifier;
 use G8scope\Core\Contracts\OccurrenceStore;
 use G8scope\Core\Contracts\OccurrenceWriter;
+use G8scope\Core\Contracts\ReportGenerator;
 use G8scope\Core\Contracts\Scrubber;
+use G8scope\Core\Contracts\SupportProvider;
+use G8scope\Core\Endpoints\DefaultEndpointResolver;
+use G8scope\Core\Entitlement\EloquentEntitlementGate;
 use G8scope\Core\Fingerprinting\DefaultFingerprinter;
 use G8scope\Core\Fingerprinting\NormalizerRegistry;
 use G8scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
@@ -23,8 +29,10 @@ use G8scope\Core\Notifications\Channels\TelegramChannel;
 use G8scope\Core\Notifications\Channels\WebhookChannel;
 use G8scope\Core\Observers\ProjectObserver;
 use G8scope\Core\Privacy\PiiProtectionScrubber;
+use G8scope\Core\Reporting\FilesystemReportGenerator;
 use G8scope\Core\Stores\ClickHouseOccurrenceStore;
 use G8scope\Core\Stores\EloquentIssueStore;
+use G8scope\Core\Support\G8deskSupportProvider;
 use Illuminate\Support\ServiceProvider;
 
 class G8scopeCoreServiceProvider extends ServiceProvider
@@ -38,6 +46,16 @@ class G8scopeCoreServiceProvider extends ServiceProvider
         $this->bindDriver(IssueStore::class, 'issue_store', fn () => new EloquentIssueStore);
         $this->bindOccurrenceStore();
         $this->bindNotifier();
+
+        // P2 seams.
+        $this->bindDriver(EntitlementGate::class, 'entitlement_gate', fn () => new EloquentEntitlementGate);
+        $this->bindDriver(EndpointResolver::class, 'endpoint_resolver', fn () => new DefaultEndpointResolver);
+        $this->bindDriver(ReportGenerator::class, 'report_generator', fn () => new FilesystemReportGenerator);
+        $this->bindDriver(
+            SupportProvider::class,
+            'support_provider',
+            fn () => G8deskSupportProvider::fromConfig((array) config('g8scope.g8desk', [])),
+        );
 
         $this->app->singleton(
             AlertDispatcher::class,
