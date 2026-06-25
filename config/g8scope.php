@@ -19,6 +19,7 @@ return [
         'billing_provider' => null, // implements G8Scope\Core\Contracts\BillingProvider
         'apm_store' => null,        // implements G8Scope\Core\Contracts\ApmStore
         'metric_store' => null,     // implements G8Scope\Core\Contracts\MetricStore
+        'rum_store' => null,        // implements G8Scope\Core\Contracts\RumStore
         'support_provider' => null,
         'report_generator' => null,
         'notifier' => null,

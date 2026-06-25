@@ -18,6 +18,7 @@ use G8Scope\Core\Contracts\Notifier;
 use G8Scope\Core\Contracts\OccurrenceStore;
 use G8Scope\Core\Contracts\OccurrenceWriter;
 use G8Scope\Core\Contracts\ReportGenerator;
+use G8Scope\Core\Contracts\RumStore;
 use G8Scope\Core\Contracts\Scrubber;
 use G8Scope\Core\Contracts\SupportProvider;
 use G8Scope\Core\Endpoints\DefaultEndpointResolver;
@@ -38,6 +39,7 @@ use G8Scope\Core\Notifications\Channels\WebhookChannel;
 use G8Scope\Core\Observers\ProjectObserver;
 use G8Scope\Core\Privacy\PiiProtectionScrubber;
 use G8Scope\Core\Reporting\FilesystemReportGenerator;
+use G8Scope\Core\Rum\EloquentRumStore;
 use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 use G8Scope\Core\Stores\EloquentIssueStore;
 use G8Scope\Core\Support\G8DeskSupportProvider;
@@ -69,6 +71,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
         $this->bindDriver(ApmStore::class, 'apm_store', fn () => new EloquentApmStore);
         $this->bindDriver(MetricStore::class, 'metric_store', fn () => new EloquentMetricStore);
+        $this->bindDriver(RumStore::class, 'rum_store', fn () => new EloquentRumStore);
         $this->bindDriver(EndpointResolver::class, 'endpoint_resolver', fn () => new DefaultEndpointResolver);
         $this->bindDriver(ReportGenerator::class, 'report_generator', fn () => new FilesystemReportGenerator);
         $this->bindDriver(
