@@ -21,6 +21,7 @@ use G8Scope\Core\Contracts\ReportGenerator;
 use G8Scope\Core\Contracts\RumStore;
 use G8Scope\Core\Contracts\Scrubber;
 use G8Scope\Core\Contracts\SupportProvider;
+use G8Scope\Core\Contracts\TenantConnectionResolver;
 use G8Scope\Core\Endpoints\DefaultEndpointResolver;
 use G8Scope\Core\Entitlement\EloquentEntitlementGate;
 use G8Scope\Core\Fingerprinting\DefaultFingerprinter;
@@ -29,6 +30,7 @@ use G8Scope\Core\Fingerprinting\Normalizers\GoNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\JavascriptNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\PhpNormalizer;
 use G8Scope\Core\Fingerprinting\Normalizers\PythonNormalizer;
+use G8Scope\Core\Isolation\DefaultTenantConnectionResolver;
 use G8Scope\Core\Metrics\EloquentMetricStore;
 use G8Scope\Core\Models\Project;
 use G8Scope\Core\Notifications\ChannelNotifier;
@@ -72,6 +74,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         $this->bindDriver(ApmStore::class, 'apm_store', fn () => new EloquentApmStore);
         $this->bindDriver(MetricStore::class, 'metric_store', fn () => new EloquentMetricStore);
         $this->bindDriver(RumStore::class, 'rum_store', fn () => new EloquentRumStore);
+        $this->bindDriver(TenantConnectionResolver::class, 'tenant_connection_resolver', fn () => new DefaultTenantConnectionResolver);
         $this->bindDriver(EndpointResolver::class, 'endpoint_resolver', fn () => new DefaultEndpointResolver);
         $this->bindDriver(ReportGenerator::class, 'report_generator', fn () => new FilesystemReportGenerator);
         $this->bindDriver(

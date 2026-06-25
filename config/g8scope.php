@@ -20,6 +20,7 @@ return [
         'apm_store' => null,        // implements G8Scope\Core\Contracts\ApmStore
         'metric_store' => null,     // implements G8Scope\Core\Contracts\MetricStore
         'rum_store' => null,        // implements G8Scope\Core\Contracts\RumStore
+        'tenant_connection_resolver' => null, // implements G8Scope\Core\Contracts\TenantConnectionResolver
         'support_provider' => null,
         'report_generator' => null,
         'notifier' => null,
