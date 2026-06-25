@@ -54,3 +54,34 @@ it('alerts on a regression', function (): void {
     $event = $this->dispatcher->dispatchFor($reopened, $reopened->wasRecentlyCreated, $reopened->justRegressed);
     expect($event)->toBe('regression');
 });
+
+it('fires a spike rule once when the occurrence threshold is reached (#24)', function (): void {
+    $this->project->alertRules()->create([
+        'channel' => 'webhook',
+        'target' => ['url' => 'https://hooks.test/spike'],
+        'enabled' => true,
+        'conditions' => ['threshold' => 5],
+    ]);
+    $issue = $this->store->upsert($this->project->id, 'spike', ['type' => 'E']);
+    $issue->update(['occurrences_count' => 5]);
+
+    // A recurring occurrence (not new/regression) whose count hits the threshold.
+    $event = $this->dispatcher->dispatchFor($issue->fresh(), false, false);
+
+    expect($event)->toBe('threshold');
+    Http::assertSent(fn ($r) => $r->url() === 'https://hooks.test/spike');
+});
+
+it('does not fire a spike rule before the threshold (#24)', function (): void {
+    $this->project->alertRules()->create([
+        'channel' => 'webhook',
+        'target' => ['url' => 'https://hooks.test/spike'],
+        'enabled' => true,
+        'conditions' => ['threshold' => 5],
+    ]);
+    $issue = $this->store->upsert($this->project->id, 'spike', ['type' => 'E']);
+    $issue->update(['occurrences_count' => 3]);
+
+    $event = $this->dispatcher->dispatchFor($issue->fresh(), false, false);
+    expect($event)->toBeNull();
+});
