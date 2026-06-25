@@ -87,6 +87,38 @@ class ClickHouseOccurrenceStore implements OccurrenceStore, OccurrenceWriter
         )->rows();
     }
 
+    /**
+     * Events over time across one or more projects (for analytics). Returns
+     * buckets of {bucket, count} for the last $hours hours.
+     *
+     * @param  array<int,int>  $projectIds
+     * @return array<int,array{bucket:string,count:int}>
+     */
+    public function eventsOverTime(array $projectIds, string $interval = '1h', int $hours = 48): array
+    {
+        if ($projectIds === []) {
+            return [];
+        }
+
+        $bucket = match ($interval) {
+            '1m' => 'toStartOfMinute(occurred_at)',
+            '1d' => 'toStartOfDay(occurred_at)',
+            default => 'toStartOfHour(occurred_at)',
+        };
+        $ids = implode(',', array_map('intval', $projectIds));
+
+        $rows = $this->client->select(
+            'SELECT '.$bucket.' AS bucket, count() AS count FROM '.self::TABLE.
+            ' WHERE project_id IN ('.$ids.') AND occurred_at >= now() - INTERVAL '.(int) $hours.' HOUR'.
+            ' GROUP BY bucket ORDER BY bucket'
+        )->rows();
+
+        return array_map(
+            static fn ($r) => ['bucket' => (string) $r['bucket'], 'count' => (int) $r['count']],
+            $rows
+        );
+    }
+
     /** Total occurrences for a project release — used by ReleaseHealth (spec §8). */
     public function countForRelease(int $projectId, string $release): int
     {
