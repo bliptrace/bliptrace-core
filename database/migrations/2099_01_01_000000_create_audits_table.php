@@ -11,6 +11,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // A consuming app may already ship an audits table (e.g. Kickoff/owen-it).
+        if (Schema::hasTable('audits')) {
+            return;
+        }
+
         Schema::create('audits', function (Blueprint $table): void {
             $table->id();
             $table->string('user_type')->nullable();
