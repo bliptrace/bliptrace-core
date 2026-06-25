@@ -23,6 +23,9 @@ class Issue extends Model implements Auditable
     /** Only audit the fields that matter for triage history. */
     protected array $auditInclude = ['status', 'assignee_user_id', 'level'];
 
+    /** Transient flag set by IssueStore when a resolved issue reoccurs. Not persisted. */
+    public bool $justRegressed = false;
+
     protected function casts(): array
     {
         return [

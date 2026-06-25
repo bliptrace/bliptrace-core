@@ -15,7 +15,7 @@ interface Normalizer
     public function runtime(): string;
 
     /**
-     * @param array<int,array<string,mixed>> $frames
+     * @param  array<int,array<string,mixed>>  $frames
      * @return array<int,array<string,mixed>>
      */
     public function normalize(array $frames): array;

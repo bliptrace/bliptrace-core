@@ -12,7 +12,7 @@ use G8scope\Core\Enums\ReportType;
 interface ReportGenerator
 {
     /**
-     * @param array<string,mixed> $options
+     * @param  array<string,mixed>  $options
      * @return string Path or URL of the generated artifact.
      */
     public function generate(int $projectId, ReportType $type, array $options = []): string;

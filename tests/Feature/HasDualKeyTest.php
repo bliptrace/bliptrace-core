@@ -15,10 +15,12 @@ beforeEach(function (): void {
 });
 
 it('auto-fills a uuid on create and binds routes on uuid', function (): void {
-    $model = new class extends Model {
+    $model = new class extends Model
+    {
         use HasDualKey;
 
         protected $table = 'dummies';
+
         protected $guarded = [];
     };
 

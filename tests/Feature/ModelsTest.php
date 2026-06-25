@@ -11,7 +11,9 @@ use G8scope\Core\Models\IngestKey;
 use G8scope\Core\Models\Issue;
 use G8scope\Core\Models\Membership;
 use G8scope\Core\Models\Project;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use OwenIt\Auditing\Models\Audit;
 
 uses(RefreshDatabase::class);
@@ -63,9 +65,9 @@ it('enforces the project+fingerprint uniqueness', function (): void {
 
     // Nested transaction = savepoint, so the unique violation rolls back to the
     // savepoint without poisoning the RefreshDatabase outer transaction (Postgres).
-    expect(fn () => Illuminate\Support\Facades\DB::transaction(
+    expect(fn () => DB::transaction(
         fn () => $project->issues()->create(['fingerprint' => 'dup', 'type' => 'E'])
-    ))->toThrow(Illuminate\Database\QueryException::class);
+    ))->toThrow(QueryException::class);
 });
 
 it('hides the ingest key hash', function (): void {

@@ -15,7 +15,7 @@ interface IssueStore
     /**
      * Find-or-create the issue for a fingerprint and bump its counters.
      *
-     * @param array<string,mixed> $attributes
+     * @param  array<string,mixed>  $attributes
      * @return object The issue (with public uuid + internal id).
      */
     public function upsert(int $projectId, string $fingerprint, array $attributes): object;

@@ -13,7 +13,7 @@ return [
         'fingerprinter' => null,   // implements G8scope\Core\Contracts\Fingerprinter
         'scrubber' => null,        // implements G8scope\Core\Contracts\Scrubber
         'issue_store' => null,     // implements G8scope\Core\Contracts\IssueStore (Postgres)
-        'occurrence_store' => null,// implements G8scope\Core\Contracts\OccurrenceStore (ClickHouse)
+        'occurrence_store' => null, // implements G8scope\Core\Contracts\OccurrenceStore (ClickHouse)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
         'support_provider' => null,
@@ -23,6 +23,12 @@ return [
 
     // Default retention in days for the shared tier (illustrative — set during pricing).
     'retention_days' => 14,
+
+    // Default (shared) endpoints provisioned for every new project (Project Observer).
+    'endpoints' => [
+        'api' => env('G8SCOPE_API_URL', 'https://api.g8suite.com'),
+        'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.g8suite.com'),
+    ],
 
     // ClickHouse connection for the OccurrenceStore driver (occurrences live in CH).
     'clickhouse' => [
