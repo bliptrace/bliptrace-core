@@ -16,6 +16,7 @@ return [
         'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (ClickHouse)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
+        'billing_provider' => null, // implements G8Scope\Core\Contracts\BillingProvider
         'support_provider' => null,
         'report_generator' => null,
         'notifier' => null,
