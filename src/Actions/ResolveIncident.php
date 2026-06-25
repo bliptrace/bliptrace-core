@@ -12,8 +12,9 @@ class ResolveIncident
     public function __invoke(Incident $incident): Incident
     {
         $resolvedAt = now();
+        // Carbon 3 returns a float from diffInSeconds; mttr_seconds is a bigint.
         $mttr = $incident->opened_at
-            ? $resolvedAt->diffInSeconds($incident->opened_at, absolute: true)
+            ? (int) $resolvedAt->diffInSeconds($incident->opened_at, absolute: true)
             : null;
 
         $incident->update([
