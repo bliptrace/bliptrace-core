@@ -16,8 +16,14 @@ in `docs/architecture.md`.
 
 ## Current state
 
-**Scaffold.** Enums, the `HasDualKey` trait, and driver **contracts** (interfaces) only — the seams.
-No concrete drivers, Models, Actions or Observers yet (feature work).
+**Implemented (MVP + P2 + P3).** Enums, `HasDualKey`, 12 models + migrations, and concrete drivers
+for every seam: Fingerprinter + Normalizer registry (php/js/python/go), Scrubber (pii-protection),
+IssueStore (PG upsert/regression), ClickHouse occurrence store/writer, ChannelNotifier + channels,
+AlertDispatcher (new-issue/regression + smart grouping), Project Observer, audit (owen-it),
+EntitlementGate, EndpointResolver + SwitchEndpoint, InviteMember, g8desk SupportProvider +
+RequestSupport, ReportGenerator (csv/pdf) + GenerateReport, incidents + MTTR, SLO/anomaly strategies,
+ReleaseHealth, and the `RecordOccurrence` orchestration action. **Tested against real Postgres +
+ClickHouse** (`docker compose up -d`, then `composer test`).
 
 ## Commands
 
