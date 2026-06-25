@@ -26,8 +26,8 @@ return [
 
     // Default (shared) endpoints provisioned for every new project (Project Observer).
     'endpoints' => [
-        'api' => env('G8SCOPE_API_URL', 'https://api.g8suite.com'),
-        'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.g8suite.com'),
+        'api' => env('G8SCOPE_API_URL', 'https://ingest.scope.g8suite.com'),
+        'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com'),
     ],
 
     // ClickHouse connection for the OccurrenceStore driver (occurrences live in CH).
