@@ -58,4 +58,9 @@ class Project extends Model implements Auditable
     {
         return $this->hasMany(AlertRule::class);
     }
+
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
+    }
 }
