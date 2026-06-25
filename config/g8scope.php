@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use G8Scope\Core\Billing\StripeBillingProvider;
 
 /*
  * g8scope-core configuration.
@@ -16,7 +17,11 @@ return [
         'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (ClickHouse)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
-        'billing_provider' => null, // implements G8Scope\Core\Contracts\BillingProvider
+        // BillingProvider: 'stripe' selects the Stripe one-time Checkout driver;
+        // anything else (or unset) falls back to ManualBillingProvider (admin unlock).
+        'billing_provider' => env('G8SCOPE_BILLING_DRIVER') === 'stripe'
+            ? StripeBillingProvider::class
+            : null,
         'apm_store' => null,        // implements G8Scope\Core\Contracts\ApmStore
         'metric_store' => null,     // implements G8Scope\Core\Contracts\MetricStore
         'rum_store' => null,        // implements G8Scope\Core\Contracts\RumStore
@@ -33,6 +38,27 @@ return [
     'endpoints' => [
         'api' => env('G8SCOPE_API_URL', 'https://ingest.scope.g8suite.com'),
         'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com'),
+    ],
+
+    // Billing (BillingProvider driver) — spec §12–13. One-time, permanent
+    // capability unlock via Stripe Checkout (mode=payment). International-first:
+    // currency/locale are driven by the Stripe Price + Checkout, not configured here.
+    'billing' => [
+        'stripe' => [
+            'secret' => env('STRIPE_SECRET'),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+            // One-time Stripe Price IDs per purchasable capability. A null/empty
+            // price means that capability is unlocked manually (no online checkout).
+            'prices' => [
+                'custom_api' => env('STRIPE_PRICE_CUSTOM_API'),
+                'custom_mcp' => env('STRIPE_PRICE_CUSTOM_MCP'),
+                'seats' => env('STRIPE_PRICE_SEAT'),
+            ],
+        ],
+        // Where Stripe returns the customer after checkout. `{CHECKOUT_SESSION_ID}`
+        // in the success URL is substituted by Stripe.
+        'success_url' => env('G8SCOPE_BILLING_SUCCESS_URL'),
+        'cancel_url' => env('G8SCOPE_BILLING_CANCEL_URL'),
     ],
 
     // g8desk support integration (SupportProvider driver) — spec §15.

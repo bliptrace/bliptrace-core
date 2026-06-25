@@ -33,20 +33,27 @@ it('allows custom_api when unlocked + flagged', function (): void {
         ->and(app(EntitlementGate::class)->allows($account->id, 'custom_mcp'))->toBeFalse();
 });
 
-it('counts seats remaining (1 free owner seat)', function (): void {
+it('counts seats remaining (owner seat is free)', function (): void {
     $account = account(['seats' => 2]);
     $project = $account->projects()->create(['name' => 'P']);
     $gate = app(EntitlementGate::class);
 
     expect($gate->seatsRemaining($account->id))->toBe(2);
+
+    // The owner does not consume a seat.
     app(InviteMember::class)($project, 1001, ProjectRole::Owner);
+    expect($gate->seatsRemaining($account->id))->toBe(2);
+
+    // A team member does.
+    app(InviteMember::class)($project, 1002, ProjectRole::Member);
     expect($gate->seatsRemaining($account->id))->toBe(1);
 });
 
-it('blocks invites when seats are exhausted', function (): void {
+it('blocks invites when seats are exhausted (owner excluded)', function (): void {
     $account = account(['seats' => 1]);
     $project = $account->projects()->create(['name' => 'P']);
-    app(InviteMember::class)($project, 1001);
+    app(InviteMember::class)($project, 1000, ProjectRole::Owner); // free
+    app(InviteMember::class)($project, 1001); // member — consumes the only seat
 
     expect(fn () => app(InviteMember::class)($project, 1002))
         ->toThrow(SeatLimitException::class);

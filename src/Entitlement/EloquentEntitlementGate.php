@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace G8Scope\Core\Entitlement;
 
 use G8Scope\Core\Contracts\EntitlementGate;
+use G8Scope\Core\Enums\ProjectRole;
 use G8Scope\Core\Models\Entitlement;
 use G8Scope\Core\Models\Membership;
 use G8Scope\Core\Models\Project;
@@ -35,7 +36,16 @@ class EloquentEntitlementGate implements EntitlementGate
         $seats = $entitlement?->seats ?? 1;
 
         $projectIds = Project::where('account_id', $accountId)->pluck('id');
+
+        // The account owner gets a free seat (spec §13). `seats` counts the team
+        // members invited *beyond* the owner, so owners never consume a seat.
+        $ownerIds = Membership::whereIn('project_id', $projectIds)
+            ->where('role', ProjectRole::Owner->value)
+            ->distinct()
+            ->pluck('user_id');
+
         $used = Membership::whereIn('project_id', $projectIds)
+            ->whereNotIn('user_id', $ownerIds)
             ->distinct()
             ->count('user_id');
 

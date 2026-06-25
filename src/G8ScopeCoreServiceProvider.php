@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace G8Scope\Core;
 
+use G8Scope\Core\Actions\GrantCapability;
 use G8Scope\Core\Alerting\AlertDispatcher;
 use G8Scope\Core\Apm\EloquentApmStore;
 use G8Scope\Core\Billing\ManualBillingProvider;
+use G8Scope\Core\Billing\StripeBillingProvider;
 use G8Scope\Core\Contracts\ApmStore;
 use G8Scope\Core\Contracts\BillingProvider;
 use G8Scope\Core\Contracts\EndpointResolver;
@@ -70,7 +72,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
 
         // P2 seams.
         $this->bindDriver(EntitlementGate::class, 'entitlement_gate', fn () => new EloquentEntitlementGate);
-        $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
+        $this->bindBillingProvider();
         $this->bindDriver(ApmStore::class, 'apm_store', fn () => new EloquentApmStore);
         $this->bindDriver(MetricStore::class, 'metric_store', fn () => new EloquentMetricStore);
         $this->bindDriver(RumStore::class, 'rum_store', fn () => new EloquentRumStore);
@@ -125,6 +127,23 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
             'fingerprinter',
             fn () => new DefaultFingerprinter($this->app->make(NormalizerRegistry::class)),
         );
+    }
+
+    private function bindBillingProvider(): void
+    {
+        // Stripe driver is built from config (secret, prices, webhook secret) like
+        // the occurrence store / support provider — autowiring can't supply those.
+        $this->app->singleton(
+            StripeBillingProvider::class,
+            fn ($app) => StripeBillingProvider::fromConfig(
+                (array) config('g8scope.billing', []),
+                $app->make(GrantCapability::class),
+            ),
+        );
+
+        // config('g8scope.drivers.billing_provider') resolves to StripeBillingProvider::class
+        // when G8SCOPE_BILLING_DRIVER=stripe; otherwise the manual (admin unlock) default.
+        $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
     }
 
     private function bindOccurrenceStore(): void
