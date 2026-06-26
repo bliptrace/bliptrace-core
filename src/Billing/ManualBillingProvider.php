@@ -13,7 +13,7 @@ use G8Scope\Core\Contracts\BillingProvider;
  */
 class ManualBillingProvider implements BillingProvider
 {
-    public function checkoutUrl(int $accountId, string $capability): ?string
+    public function checkoutUrl(int $accountId, string $capability, int $quantity = 1): ?string
     {
         return null;
     }

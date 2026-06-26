@@ -34,7 +34,7 @@ function stripeProvider(array $prices = []): StripeBillingProvider
 }
 
 /** Build a checkout.session.completed payload + a valid Stripe signature header. */
-function signedCheckout(int $accountId, string $capability, string $eventId = 'evt_1', string $paymentStatus = 'paid'): array
+function signedCheckout(int $accountId, string $capability, string $eventId = 'evt_1', string $paymentStatus = 'paid', int $quantity = 1): array
 {
     $payload = json_encode([
         'id' => $eventId,
@@ -45,7 +45,7 @@ function signedCheckout(int $accountId, string $capability, string $eventId = 'e
             'payment_status' => $paymentStatus,
             'amount_total' => 9900,
             'currency' => 'usd',
-            'metadata' => ['account_id' => (string) $accountId, 'capability' => $capability],
+            'metadata' => ['account_id' => (string) $accountId, 'capability' => $capability, 'quantity' => (string) $quantity],
         ]],
     ], JSON_THROW_ON_ERROR);
 
@@ -112,6 +112,16 @@ it('does not double-grant on webhook replay', function (): void {
         ->and($provider->handleWebhook($payload, $signature))->toBeFalse()
         ->and(Entitlement::where('account_id', $account->id)->value('seats'))->toBe(2)
         ->and(BillingEvent::where('event_id', 'evt_seat')->count())->toBe(1);
+});
+
+it('grants multiple seats from a bulk seat purchase', function (): void {
+    $account = billingAccount();
+    $account->entitlement()->create(['seats' => 3]);
+    [$payload, $signature] = signedCheckout($account->id, 'seats', 'evt_bulk', 'paid', 5);
+
+    expect(stripeProvider()->handleWebhook($payload, $signature))->toBeTrue()
+        ->and(Entitlement::where('account_id', $account->id)->value('seats'))->toBe(8) // 3 + 5
+        ->and(BillingEvent::where('event_id', 'evt_bulk')->value('quantity'))->toBe(5);
 });
 
 it('rejects a webhook with an invalid signature', function (): void {

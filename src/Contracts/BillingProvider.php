@@ -14,9 +14,10 @@ interface BillingProvider
 {
     /**
      * Checkout URL to purchase a capability for an account, or null when billing
-     * is manual / no provider is configured.
+     * is manual / no provider is configured. `$quantity` applies to quantifiable
+     * capabilities (seats); it is ignored for the one-off endpoint unlocks.
      *
      * @param  'custom_api'|'custom_mcp'|'seats'  $capability
      */
-    public function checkoutUrl(int $accountId, string $capability): ?string;
+    public function checkoutUrl(int $accountId, string $capability, int $quantity = 1): ?string;
 }
