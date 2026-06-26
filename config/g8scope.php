@@ -34,6 +34,10 @@ return [
     // Default retention in days for the shared tier (illustrative — set during pricing).
     'retention_days' => 14,
 
+    // Free seats granted to a new account (owner is always free on top of this).
+    // The web app overrides this from a DB setting so admins can change the default.
+    'default_free_seats' => (int) env('G8SCOPE_DEFAULT_FREE_SEATS', 3),
+
     // Default (shared) endpoints provisioned for every new project (Project Observer).
     'endpoints' => [
         'api' => env('G8SCOPE_API_URL', 'https://ingest.scope.g8suite.com'),
@@ -59,6 +63,9 @@ return [
         // in the success URL is substituted by Stripe.
         'success_url' => env('G8SCOPE_BILLING_SUCCESS_URL'),
         'cancel_url' => env('G8SCOPE_BILLING_CANCEL_URL'),
+        // Stripe Tax (automatic_tax) on checkout. Requires Stripe Tax activated +
+        // tax registrations in the Stripe account. Off by default.
+        'tax_enabled' => (bool) env('G8SCOPE_BILLING_TAX', false),
     ],
 
     // g8desk support integration (SupportProvider driver) — spec §15.

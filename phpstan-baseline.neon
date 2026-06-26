@@ -97,24 +97,6 @@ parameters:
 			path: src/Endpoints/DefaultEndpointResolver.php
 
 		-
-			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$custom_api\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Entitlement/EloquentEntitlementGate.php
-
-		-
-			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$custom_mcp\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Entitlement/EloquentEntitlementGate.php
-
-		-
-			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$seats\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Entitlement/EloquentEntitlementGate.php
-
-		-
 			message: '#^Match arm comparison between ''custom_mcp'' and ''custom_mcp'' is always true\.$#'
 			identifier: match.alwaysTrue
 			count: 1
@@ -125,12 +107,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: src/Entitlement/EloquentEntitlementGate.php
-
-		-
-			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Entitlement\:\:\$granted_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Models/Entitlement.php
 
 		-
 			message: '#^Access to an undefined property G8Scope\\Core\\Models\\IngestKey\:\:\$revoked_at\.$#'

@@ -30,6 +30,7 @@ class StripeBillingProvider implements BillingProvider
         private readonly ?string $successUrl,
         private readonly ?string $cancelUrl,
         private readonly GrantCapability $grant,
+        private readonly bool $taxEnabled = false,
     ) {}
 
     /**
@@ -47,10 +48,11 @@ class StripeBillingProvider implements BillingProvider
             isset($config['success_url']) ? (string) $config['success_url'] : null,
             isset($config['cancel_url']) ? (string) $config['cancel_url'] : null,
             $grant,
+            (bool) ($config['tax_enabled'] ?? false),
         );
     }
 
-    public function checkoutUrl(int $accountId, string $capability): ?string
+    public function checkoutUrl(int $accountId, string $capability, int $quantity = 1): ?string
     {
         $price = $this->prices[$capability] ?? null;
 
@@ -59,26 +61,32 @@ class StripeBillingProvider implements BillingProvider
             return null;
         }
 
-        $session = $this->stripe->checkout->sessions->create([
+        // Quantity only applies to quantifiable capabilities (seats); endpoint
+        // unlocks are always a single purchase.
+        $quantity = $capability === 'seats' ? max(1, $quantity) : 1;
+
+        $metadata = [
+            'account_id' => (string) $accountId,
+            'capability' => $capability,
+            'quantity' => (string) $quantity,
+        ];
+
+        $params = [
             'mode' => 'payment',
-            'line_items' => [['price' => $price, 'quantity' => 1]],
+            'line_items' => [['price' => $price, 'quantity' => $quantity]],
             'success_url' => (string) ($this->successUrl ?: ''),
             'cancel_url' => (string) ($this->cancelUrl ?: ''),
             'client_reference_id' => (string) $accountId,
-            'metadata' => [
-                'account_id' => (string) $accountId,
-                'capability' => $capability,
-            ],
+            'metadata' => $metadata,
             // Mirror onto the PaymentIntent so the metadata survives async events too.
-            'payment_intent_data' => [
-                'metadata' => [
-                    'account_id' => (string) $accountId,
-                    'capability' => $capability,
-                ],
-            ],
-        ]);
+            'payment_intent_data' => ['metadata' => $metadata],
+        ];
 
-        return $session->url;
+        if ($this->taxEnabled) {
+            $params['automatic_tax'] = ['enabled' => true];
+        }
+
+        return $this->stripe->checkout->sessions->create($params)->url;
     }
 
     /**
@@ -105,6 +113,7 @@ class StripeBillingProvider implements BillingProvider
 
         $accountId = (int) ($session->metadata->account_id ?? 0);
         $capability = (string) ($session->metadata->capability ?? '');
+        $quantity = max(1, (int) ($session->metadata->quantity ?? 1));
 
         if ($accountId <= 0 || ! in_array($capability, ['custom_api', 'custom_mcp', 'seats'], true)) {
             return false;
@@ -117,7 +126,7 @@ class StripeBillingProvider implements BillingProvider
             [
                 'account_id' => $accountId,
                 'capability' => $capability,
-                'quantity' => 1,
+                'quantity' => $quantity,
                 'amount' => $session->amount_total,
                 'currency' => $session->currency ? strtoupper((string) $session->currency) : null,
             ],
@@ -127,7 +136,7 @@ class StripeBillingProvider implements BillingProvider
             return false;
         }
 
-        ($this->grant)($accountId, $capability);
+        ($this->grant)($accountId, $capability, $quantity);
 
         $ledger->forceFill(['processed_at' => now()])->save();
 

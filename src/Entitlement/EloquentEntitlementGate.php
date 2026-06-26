@@ -33,7 +33,7 @@ class EloquentEntitlementGate implements EntitlementGate
     public function seatsRemaining(int $accountId): int
     {
         $entitlement = Entitlement::where('account_id', $accountId)->first();
-        $seats = $entitlement?->seats ?? 1;
+        $seats = $entitlement?->seats ?? (int) config('g8scope.default_free_seats', 3);
 
         $projectIds = Project::where('account_id', $accountId)->pluck('id');
 
