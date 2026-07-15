@@ -1,6 +1,5 @@
 {
     "name": "g8scope/core",
-    "version": "0.1.0",
     "description": "Domain layer for g8scope — enums, dual-ID trait, and driver contracts shared by the web app and MCP delegated writes.",
     "keywords": [
         "laravel",
