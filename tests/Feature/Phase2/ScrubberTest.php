@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use G8Scope\Core\Contracts\Scrubber;
+use G8Scope\Core\Privacy\PiiProtectionScrubber;
+use Illuminate\Support\Facades\Log;
 
 beforeEach(function (): void {
     $this->scrubber = app(Scrubber::class);
@@ -44,12 +46,15 @@ it('leaves identifier fields intact while still masking PII around them', functi
 });
 
 // The vectors below mirror g8scope-api/internal/scrub/scrub_test.go (TestText / TestScrub)
-// so the Go ingest scrubber and this one are tested against the same inputs. Keep in sync.
+// so the Go ingest scrubber and this one are tested against the same inputs AND outputs.
+// Keep them identical: a change here is a change there (security-review 0.2.2 F1/F2).
 const DIGIT_TAIL_UUID = '53a33b29-3630-48c1-83f2-123456789012';
+const CRED_UUID = '3f2a1b4c-1111-2222-3333-444455556666';
 
 dataset('scrub_text_vectors', function (): array {
     $stars = fn (string $s): string => str_repeat('*', strlen($s));
     $u = DIGIT_TAIL_UUID;
+    $pat = 'github_pat_'.str_repeat('A1b2C3d4E5', 8).'xy'; // github_pat_ + 82 chars
 
     return [
         // --- masked ---
@@ -70,6 +75,26 @@ dataset('scrub_text_vectors', function (): array {
         'GitHub token' => ['ghp_abcdefghijklmnopqrstuvwxyz0123', '**********************************'],
         'IPv4' => ['from 203.0.113.42 at', 'from ************ at'],
         'PII next to a UUID is still masked' => [$u.' ali@example.com', $u.' ***************'],
+        // Built by concatenation so the secret-guard hook does not flag a literal PAT.
+        'GitHub fine-grained PAT' => [$pat, $stars($pat)],
+
+        // --- 0.2.2 F1b–e: encoded, digit-boundary and free-text credential bypasses ---
+        'URL-encoded email' => ['ali%40example.com', '*****************'],
+        'HTML-entity email' => ['ali&#64;example.com', '*******************'],
+        'card glued to a word' => ['card_4111111111111111', 'card_****************'],
+        'IC glued to a word' => ['ic900101-14-5678', 'ic**************'],
+        'IC with spaces' => ['900101 14 5678', '**************'],
+        'phone with (area code)' => ['(012) 345 6789', '**************'],
+        'phone with dots' => ['012.345.6789', '************'],
+        'client_secret= in text' => ['client_secret=abc123', 'client_secret=******'],
+        'DB_PASSWORD= in text' => ['DB_PASSWORD=hunter2', 'DB_PASSWORD=*******'],
+        '_token= in text' => ['_token=xyz', '_token=***'],
+        'Authorization: Basic' => ['Authorization: Basic dXNlcjpwYXNz', 'Authorization: Basic ************'],
+
+        // --- 0.2.2 F2: a UUID that is a credential value is masked; other UUIDs stay ---
+        'Bearer <uuid>' => ['Bearer '.CRED_UUID, 'Bearer '.$stars(CRED_UUID)],
+        'api_key=<uuid>' => ['api_key='.CRED_UUID, 'api_key='.$stars(CRED_UUID)],
+        'plain UUID in a message' => ['request '.CRED_UUID.' failed', 'request '.CRED_UUID.' failed'],
 
         // --- left alone (false-positive guards) ---
         'UUID with an all-digit tail' => [$u, $u],
@@ -114,9 +139,21 @@ dataset('scrub_envelope_vectors', function (): array {
             ['context' => ['user' => ['Password' => 'hunter2', 'id' => $u], 'headers' => [['Authorization' => 'Bearer x']]]],
             ['context' => ['user' => ['Password' => '[REDACTED]', 'id' => $u], 'headers' => [['Authorization' => '[REDACTED]']]]],
         ],
-        'non-string scalars untouched' => [
-            ['line' => 900101145678, 'in_app' => true, 'x' => null],
-            ['line' => 900101145678, 'in_app' => true, 'x' => null],
+        'non-PII scalars untouched' => [
+            ['line' => 1234, 'ratio' => 0.5, 'in_app' => true, 'x' => null],
+            ['line' => 1234, 'ratio' => 0.5, 'in_app' => true, 'x' => null],
+        ],
+        // 0.2.2 F1b: numbers are scanned; a masked number is stored as the masked string.
+        'card as a JSON number' => [['card' => 4111111111111111], ['card' => '****************']],
+        'IC as a JSON number' => [['ic' => 900101145678], ['ic' => '************']],
+        // 0.2.2 F1a: keys are normalised (lower-case, - → _, HTTP_ stripped) and matched by fragment.
+        'credential-ish keys are redacted' => [
+            ['X-Api-Key' => 'a', 'db_password' => 'b', 'client_secret' => 'c', 'HTTP_AUTHORIZATION' => 'd', 'PHP_AUTH_PW' => 'e', 'access_key' => 'f', 'csrf_token' => 'g'],
+            ['X-Api-Key' => '[REDACTED]', 'db_password' => '[REDACTED]', 'client_secret' => '[REDACTED]', 'HTTP_AUTHORIZATION' => '[REDACTED]', 'PHP_AUTH_PW' => '[REDACTED]', 'access_key' => '[REDACTED]', 'csrf_token' => '[REDACTED]'],
+        ],
+        "'key' only as a whole token" => [
+            ['monkey' => 'banana', 'keyboard_layout' => 'qwerty'],
+            ['monkey' => 'banana', 'keyboard_layout' => 'qwerty'],
         ],
         // core only: preserve keys apply at the top level, so a nested event_id cannot smuggle PII.
         'nested event_id / occurred_at are masked' => [
@@ -129,3 +166,59 @@ dataset('scrub_envelope_vectors', function (): array {
 it('scrubs envelopes exactly like the Go ingest scrubber', function (array $in, array $want): void {
     expect(app(Scrubber::class)->scrub($in))->toBe($want);
 })->with('scrub_envelope_vectors');
+
+// --- core-only (not mirrored in Go) ---
+
+it('masks a JSON-escaped email', function (): void {
+    expect(app(Scrubber::class)->scrub(['m' => 'ali\\u0040example.com'])['m'])->toBe(str_repeat('*', 20));
+});
+
+it('fails closed when a regex errors, logging without the value', function (): void {
+    Log::spy();
+    $before = PiiProtectionScrubber::$failures;
+    $limit = ini_get('pcre.backtrack_limit');
+    $jit = ini_get('pcre.jit');
+    ini_set('pcre.jit', '0');
+    ini_set('pcre.backtrack_limit', '1');
+
+    try {
+        $out = (new PiiProtectionScrubber)->scrub(['m' => 'contact ali@example.com now please']);
+    } finally {
+        ini_set('pcre.backtrack_limit', (string) $limit);
+        ini_set('pcre.jit', (string) $jit);
+    }
+
+    expect($out['m'])->toBe('[REDACTED]')
+        ->and(PiiProtectionScrubber::$failures)->toBe($before + 1);
+    Log::shouldHaveReceived('warning')->once()->withArgs(
+        fn (string $msg, array $ctx): bool => ! str_contains($msg.json_encode($ctx), 'ali@example.com'),
+    );
+});
+
+it('caps each value at 64 KiB and marks the remainder truncated', function (): void {
+    $in = str_repeat('x', PiiProtectionScrubber::MAX_BYTES).' ali@example.com';
+    $out = app(Scrubber::class)->scrub(['m' => $in])['m'];
+
+    expect($out)->toBe(str_repeat('x', PiiProtectionScrubber::MAX_BYTES).'[TRUNCATED]');
+});
+
+it('stays linear on pathological input without the PCRE JIT', function (string $in): void {
+    $jit = ini_get('pcre.jit');
+    ini_set('pcre.jit', '0');
+
+    try {
+        $start = hrtime(true);
+        $out = (new PiiProtectionScrubber)->text($in);
+        $ms = (hrtime(true) - $start) / 1e6;
+    } finally {
+        ini_set('pcre.jit', (string) $jit);
+    }
+
+    expect($out)->not->toBe('[REDACTED]')->and($ms)->toBeLessThan(200);
+})->with([
+    'dotted local part then a bare @ (1.5 s before the fix)' => [str_repeat('a.', 10_000).'@x'],
+    'local-part run with no @' => [str_repeat('a', 20_000)],
+    'dotted run with no TLD' => [str_repeat('a.', 10_000)],
+    'repeated @' => [str_repeat('a@', 10_000)],
+    'long credential-ish word' => [str_repeat('k', 20_000).'=v'],
+]);
