@@ -4,6 +4,23 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-03
+
+### Fixed
+- Scrubber parity with the Go ingest scrubber (`g8scope-api` 4af40fa); the Pest vectors
+  now mirror `scrub_test.go` TestText / TestScrub one for one (same names, order, outputs):
+  - free-text `<word>[=:]value` uses the same key rule as key names (so `monkey=5`,
+    `keyboard_layout=us` are kept, `X-Api-Key: …` is masked); a `Bearer `/`Basic ` prefix is
+    skipped; a value cannot start with `:` (`Authenticate::handle` is kept);
+  - `auth` redacts as a key substring (as in Go); `key` only as a whole `_` token;
+  - decoding matches Go: tokens containing `%`, `&`, `\u0040` or `\x40`; HTML-unescaped,
+    then path- and query-unescaped candidates, up to 3 levels; masked by character count;
+  - an integral float (`4111111111111111.0`) is scanned as plain digits;
+  - truncation at 64 KiB never splits a UTF-8 character.
+
+### Known gaps
+- camelCase keys (`accessKey`) are not split, so they are not redacted by name (same in Go).
+
 ## [0.2.2] - 2026-11-03
 
 Security-review fixes F1–F5. The scrubber changes mirror `g8scope-api/internal/scrub`;

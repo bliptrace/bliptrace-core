@@ -54,8 +54,10 @@ const CRED_UUID = '3f2a1b4c-1111-2222-3333-444455556666';
 dataset('scrub_text_vectors', function (): array {
     $stars = fn (string $s): string => str_repeat('*', strlen($s));
     $u = DIGIT_TAIL_UUID;
-    $pat = 'github_pat_'.str_repeat('A1b2C3d4E5', 8).'xy'; // github_pat_ + 82 chars
+    $c = CRED_UUID;
+    $pat = 'github'.'_pat_'.str_repeat('A1b2', 6); // assembled so no token-shaped literal is committed
 
+    // Same order and names as TestText in scrub_test.go.
     return [
         // --- masked ---
         'email' => ['mail ali.bin-abu@example.gov.my now', 'mail '.$stars('ali.bin-abu@example.gov.my').' now'],
@@ -73,28 +75,9 @@ dataset('scrub_text_vectors', function (): array {
         'api key in JSON-ish text' => ['{"api_key": "k-123456"}', '{"api_key": "********"}'],
         'JWT' => ['jwt eyJhbGciOiJ.eyJzdWIiOiIx.SflKxwRJSM', 'jwt '.$stars('eyJhbGciOiJ.eyJzdWIiOiIx.SflKxwRJSM')],
         'GitHub token' => ['ghp_abcdefghijklmnopqrstuvwxyz0123', '**********************************'],
-        'IPv4' => ['from 203.0.113.42 at', 'from ************ at'],
+        'GitHub fine-grained PAT' => ['pat '.$pat, 'pat '.$stars($pat)],
+        'IPv4 (mirrors pii-protection)' => ['from 203.0.113.42 at', 'from ************ at'],
         'PII next to a UUID is still masked' => [$u.' ali@example.com', $u.' ***************'],
-        // Built by concatenation so the secret-guard hook does not flag a literal PAT.
-        'GitHub fine-grained PAT' => [$pat, $stars($pat)],
-
-        // --- 0.2.2 F1b–e: encoded, digit-boundary and free-text credential bypasses ---
-        'URL-encoded email' => ['ali%40example.com', '*****************'],
-        'HTML-entity email' => ['ali&#64;example.com', '*******************'],
-        'card glued to a word' => ['card_4111111111111111', 'card_****************'],
-        'IC glued to a word' => ['ic900101-14-5678', 'ic**************'],
-        'IC with spaces' => ['900101 14 5678', '**************'],
-        'phone with (area code)' => ['(012) 345 6789', '**************'],
-        'phone with dots' => ['012.345.6789', '************'],
-        'client_secret= in text' => ['client_secret=abc123', 'client_secret=******'],
-        'DB_PASSWORD= in text' => ['DB_PASSWORD=hunter2', 'DB_PASSWORD=*******'],
-        '_token= in text' => ['_token=xyz', '_token=***'],
-        'Authorization: Basic' => ['Authorization: Basic dXNlcjpwYXNz', 'Authorization: Basic ************'],
-
-        // --- 0.2.2 F2: a UUID that is a credential value is masked; other UUIDs stay ---
-        'Bearer <uuid>' => ['Bearer '.CRED_UUID, 'Bearer '.$stars(CRED_UUID)],
-        'api_key=<uuid>' => ['api_key='.CRED_UUID, 'api_key='.$stars(CRED_UUID)],
-        'plain UUID in a message' => ['request '.CRED_UUID.' failed', 'request '.CRED_UUID.' failed'],
 
         // --- left alone (false-positive guards) ---
         'UUID with an all-digit tail' => [$u, $u],
@@ -111,6 +94,37 @@ dataset('scrub_text_vectors', function (): array {
         'trace id' => ['4bf92f3577b34da6a3ce929d0e0e4736', '4bf92f3577b34da6a3ce929d0e0e4736'],
         'csrf_token word is not a credential key' => ['csrf_token missing', 'csrf_token missing'],
         'short string' => ['12345', '12345'],
+        'word containing key is not a credential' => ['monkey=5 keyboard_layout=us', 'monkey=5 keyboard_layout=us'],
+        'static-call frame is not a credential' => ['App\Http\Middleware\Authenticate::handle', 'App\Http\Middleware\Authenticate::handle'],
+        'float with one dot is not a phone' => ['took 0.123456789s', 'took 0.123456789s'],
+        'percent-encoded non-PII is kept' => ['path /a%20b/c?q=x%2Fy', 'path /a%20b/c?q=x%2Fy'],
+
+        // --- F1c: encoded PII masks the whole token ---
+        'percent-encoded email' => ['ali%40example.com', $stars('ali%40example.com')],
+        'HTML-entity email' => ['ali&#64;example.com', $stars('ali&#64;example.com')],
+        'double-encoded email in a query' => ['to=ali%2540example.com&x=1 sent', $stars('to=ali%2540example.com&x=1').' sent'],
+        'unicode-escaped email' => ['ali@example.com', $stars('ali@example.com')],
+
+        // --- F1d: digit boundaries instead of \b ---
+        'card glued to a word' => ['card_4111111111111111', 'card_****************'],
+        'IC glued to a word' => ['ic900101-14-5678', 'ic**************'],
+        'IC with spaces' => ['900101 14 5678', '**************'],
+        'phone with area parens' => ['(012) 345 6789', '**************'],
+        'phone with dots' => ['012.345.6789', '************'],
+        'card inside a longer digit run is not half-masked' => ['id 41111111111111112', 'id 41111111111111112'],
+
+        // --- F1e: free-text credentials ---
+        'client_secret=' => ['client_secret='.'abc123', 'client_secret=******'],
+        'DB_PASSWORD=' => ['DB_PASSWORD='.'hunter2', 'DB_PASSWORD=*******'],
+        '_token=' => ['_token='.'xyz', '_token=***'],
+        'Authorization: Basic' => ['Authorization: Basic '.'dXNlcjpwYXNz', 'Authorization: Basic ************'],
+        'X-Api-Key header line' => ['X-Api-Key: '.'k9f8e7d6', 'X-Api-Key: ********'],
+
+        // --- F2: credentials before UUID protection ---
+        'Bearer <uuid>' => ['Bearer '.$c, 'Bearer '.$stars($c)],
+        'api_key=<uuid>' => ['api_key='.$c, 'api_key='.$stars($c)],
+        'token: <uuid>' => ['token: '.$c, 'token: '.$stars($c)],
+        'plain UUID in text is kept' => ['request '.$c.' failed', 'request '.$c.' failed'],
         'plain message' => ['Undefined index: user', 'Undefined index: user'],
     ];
 });
@@ -121,9 +135,11 @@ it('masks free text exactly like the Go ingest scrubber', function (string $in, 
 
 dataset('scrub_envelope_vectors', function (): array {
     $u = DIGIT_TAIL_UUID;
+    $r = '[REDACTED]';
 
+    // Same order and names as TestScrub in scrub_test.go.
     return [
-        'event_id and occurred_at are never masked' => [
+        'top-level event_id and occurred_at are never masked' => [
             ['event_id' => $u, 'occurred_at' => '2026-06-25T09:14:32.521Z'],
             ['event_id' => $u, 'occurred_at' => '2026-06-25T09:14:32.521Z'],
         ],
@@ -137,28 +153,28 @@ dataset('scrub_envelope_vectors', function (): array {
         ],
         'sensitive keys are redacted wholesale, case-insensitively' => [
             ['context' => ['user' => ['Password' => 'hunter2', 'id' => $u], 'headers' => [['Authorization' => 'Bearer x']]]],
-            ['context' => ['user' => ['Password' => '[REDACTED]', 'id' => $u], 'headers' => [['Authorization' => '[REDACTED]']]]],
+            ['context' => ['user' => ['Password' => $r, 'id' => $u], 'headers' => [['Authorization' => $r]]]],
         ],
-        'non-PII scalars untouched' => [
-            ['line' => 1234, 'ratio' => 0.5, 'in_app' => true, 'x' => null],
-            ['line' => 1234, 'ratio' => 0.5, 'in_app' => true, 'x' => null],
-        ],
-        // 0.2.2 F1b: numbers are scanned; a masked number is stored as the masked string.
-        'card as a JSON number' => [['card' => 4111111111111111], ['card' => '****************']],
-        'IC as a JSON number' => [['ic' => 900101145678], ['ic' => '************']],
-        // 0.2.2 F1a: keys are normalised (lower-case, - → _, HTTP_ stripped) and matched by fragment.
-        'credential-ish keys are redacted' => [
-            ['X-Api-Key' => 'a', 'db_password' => 'b', 'client_secret' => 'c', 'HTTP_AUTHORIZATION' => 'd', 'PHP_AUTH_PW' => 'e', 'access_key' => 'f', 'csrf_token' => 'g'],
-            ['X-Api-Key' => '[REDACTED]', 'db_password' => '[REDACTED]', 'client_secret' => '[REDACTED]', 'HTTP_AUTHORIZATION' => '[REDACTED]', 'PHP_AUTH_PW' => '[REDACTED]', 'access_key' => '[REDACTED]', 'csrf_token' => '[REDACTED]'],
-        ],
-        "'key' only as a whole token" => [
-            ['monkey' => 'banana', 'keyboard_layout' => 'qwerty'],
-            ['monkey' => 'banana', 'keyboard_layout' => 'qwerty'],
-        ],
-        // core only: preserve keys apply at the top level, so a nested event_id cannot smuggle PII.
+        // Preserve keys apply only at the top level, so a nested event_id cannot smuggle PII.
         'nested event_id / occurred_at are masked' => [
             ['extra' => ['event_id' => 'ali@example.com', 'occurred_at' => 'call 012-3456789']],
             ['extra' => ['event_id' => '***************', 'occurred_at' => 'call ***********']],
+        ],
+        'non-PII scalars untouched' => [
+            ['line' => 1234, 'ts' => 1782379672521, 'ratio' => 0.123456789, 'in_app' => true, 'x' => null],
+            ['line' => 1234, 'ts' => 1782379672521, 'ratio' => 0.123456789, 'in_app' => true, 'x' => null],
+        ],
+        // F1b: numbers are scanned; a masked number is stored as the masked string.
+        'card as a JSON number' => [['card' => 4111111111111111], ['card' => '****************']],
+        'IC as a JSON number' => [['ic' => 900101145678], ['ic' => '************']],
+        // F1a: key normalisation.
+        'sensitive key names are redacted' => [
+            ['X-Api-Key' => 'a', 'db_password' => 'b', 'client_secret' => 'c', 'HTTP_AUTHORIZATION' => 'd', 'PHP_AUTH_PW' => 'e', 'access_key' => 'f', 'csrf_token' => 'g', 'Set-Cookie' => 'h', 'session_id' => 'i'],
+            ['X-Api-Key' => $r, 'db_password' => $r, 'client_secret' => $r, 'HTTP_AUTHORIZATION' => $r, 'PHP_AUTH_PW' => $r, 'access_key' => $r, 'csrf_token' => $r, 'Set-Cookie' => $r, 'session_id' => $r],
+        ],
+        'key only as a whole token' => [
+            ['monkey' => 'banana', 'keyboard_layout' => 'us', 'keys' => 'x'],
+            ['monkey' => 'banana', 'keyboard_layout' => 'us', 'keys' => 'x'],
         ],
     ];
 });
@@ -169,8 +185,29 @@ it('scrubs envelopes exactly like the Go ingest scrubber', function (array $in, 
 
 // --- core-only (not mirrored in Go) ---
 
-it('masks a JSON-escaped email', function (): void {
-    expect(app(Scrubber::class)->scrub(['m' => 'ali\\u0040example.com'])['m'])->toBe(str_repeat('*', 20));
+it('masks a GitHub fine-grained PAT of full length (github_pat_ + 82 chars)', function (): void {
+    $pat = 'github'.'_pat_'.str_repeat('A1b2C3d4E5', 8).'xy';
+
+    expect(app(Scrubber::class)->scrub(['m' => $pat])['m'])->toBe(str_repeat('*', strlen($pat)));
+});
+
+it('masks a card held as a float, keeps other floats as numbers', function (): void {
+    expect(app(Scrubber::class)->scrub(['card' => 4111111111111111.0, 'n' => 42.0]))
+        ->toBe(['card' => '****************', 'n' => 42.0]);
+});
+
+it('never cuts a UTF-8 character when truncating', function (): void {
+    $out = app(Scrubber::class)->scrub(['m' => str_repeat('é', PiiProtectionScrubber::MAX_BYTES)])['m'];
+
+    expect($out)->toEndWith('[TRUNCATED]')
+        ->and(mb_check_encoding($out, 'UTF-8'))->toBeTrue()
+        ->and(strlen($out))->toBeLessThanOrEqual(PiiProtectionScrubber::MAX_BYTES + strlen('[TRUNCATED]'));
+});
+
+it('masks PII inside the scan window of a long value', function (): void {
+    $out = app(Scrubber::class)->scrub(['m' => str_repeat('x', PiiProtectionScrubber::MAX_BYTES - 15).' ali@example.com'])['m'];
+
+    expect($out)->not->toContain('ali@');
 });
 
 it('fails closed when a regex errors, logging without the value', function (): void {
@@ -221,4 +258,5 @@ it('stays linear on pathological input without the PCRE JIT', function (string $
     'dotted run with no TLD' => [str_repeat('a.', 10_000)],
     'repeated @' => [str_repeat('a@', 10_000)],
     'long credential-ish word' => [str_repeat('k', 20_000).'=v'],
+    'double-encoding chain' => [str_repeat('%25', 6_000)],
 ]);
