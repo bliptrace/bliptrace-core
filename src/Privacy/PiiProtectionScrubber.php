@@ -26,6 +26,9 @@ use RuntimeException;
  * Fail closed: if any regex errors (backtrack/JIT limit), the whole value becomes
  * [REDACTED] and a warning is logged without the value.
  *
+ * Known gap, shared with Go: camelCase keys (accessKey, apiToken is fine — token is a
+ * substring) are not split, so `accessKey` is not redacted by name.
+ *
  * The patterns mirror the Go ingest scrubber (g8scope-api/internal/scrub) so the
  * dashboard and the ingest path mask identically. event_id / occurred_at are skipped
  * only at the top level of the envelope (typed uuid / timestamptz columns).
@@ -42,12 +45,22 @@ class PiiProtectionScrubber implements Scrubber
 
     /** Key fragments that redact anywhere inside the normalised key. */
     private const KEY_SUBSTRINGS = [
-        'password', 'passwd', 'pwd', 'secret', 'token', 'authorization', 'api_key', 'apikey',
+        'password', 'passwd', 'pwd', 'secret', 'token', 'auth', 'api_key', 'apikey',
         'cookie', 'session', 'credential', 'private',
     ];
 
-    /** Key words that redact only as a whole '_'-separated token (not monkey / author). */
-    private const KEY_TOKENS = ['key', 'auth'];
+    /** Redacts only as a whole '_'-separated token (x_api_key, access_key — not monkey). */
+    private const KEY_TOKEN = 'key';
+
+    /** Decoding recursion bound (Go: maskEncoded depth). */
+    private const MAX_DECODE_DEPTH = 3;
+
+    /**
+     * `<word>[=:]value` in free text: masked when the word passes sensitiveKey() (the same
+     * rule as key names). A Bearer/Basic prefix is skipped; a value starting with ':' is
+     * not a value (Authenticate::handle).
+     */
+    private const KEY_VALUE = '/(?<![A-Za-z0-9_\-])([A-Za-z0-9_\-]+)(["\']?\s*[:=]\s*["\']?(?:(?:bearer|basic)\s+)?)(?!:)([^\s"\'&,;]+)/i';
 
     /**
      * Credentials — run on the whole string, before UUID protection.
@@ -57,10 +70,6 @@ class PiiProtectionScrubber implements Scrubber
      */
     private const CREDENTIALS = [
         ['/\bbearer\s+([A-Za-z0-9\-._~+\/]+=*)/i', true],
-        ['/\bauthorization["\']?\s*[:=]\s*["\']?basic\s+([A-Za-z0-9+\/]+=*)/i', true],
-        // Any word ENDING in secret|password|passwd|pwd|token|key, then = or : (client_secret=,
-        // DB_PASSWORD=, _token=, x-api-key:). Ending-only keeps KeyError: / TokenMismatch: intact.
-        ['/(?<![A-Za-z0-9_\-])[A-Za-z0-9_\-]*?(?:secret|password|passwd|pwd|token|key)["\']?\s*[:=]\s*["\']?([^\s"\'&,;]+)/i', true],
         ['/\beyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]+/', false],
         ['/\b(?:(?:sk|pk|rk)_(?:live|test)_[A-Za-z0-9]{10,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[abprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\b/', false],
     ];
@@ -115,10 +124,11 @@ class PiiProtectionScrubber implements Scrubber
         try {
             $tail = '';
             if (strlen($text) > self::MAX_BYTES) {
-                [$text, $tail] = [substr($text, 0, self::MAX_BYTES), self::TRUNCATION];
+                // mb_strcut never splits a UTF-8 character (invalid UTF-8 would break jsonb).
+                [$text, $tail] = [mb_strcut($text, 0, self::MAX_BYTES, 'UTF-8'), self::TRUNCATION];
             }
 
-            return $this->maskDecoded($this->maskPlain($text), $text).$tail;
+            return $this->scan($text, 0).$tail;
         } catch (RuntimeException) {
             self::$failures++;
             Log::warning('g8scope scrubber: regex failed, value redacted', ['error' => preg_last_error_msg()]);
@@ -142,7 +152,7 @@ class PiiProtectionScrubber implements Scrubber
             }
         }
 
-        return array_intersect(explode('_', $k), self::KEY_TOKENS) !== [];
+        return in_array(self::KEY_TOKEN, explode('_', $k), true);
     }
 
     /**
@@ -167,8 +177,12 @@ class PiiProtectionScrubber implements Scrubber
             } elseif (is_string($value)) {
                 $data[$key] = $this->text($value);
             } elseif (is_int($value) || is_float($value)) {
-                $masked = $this->text((string) $value);
-                if ($masked !== (string) $value) {
+                // An integral float is scanned as plain digits (4.1111111111111E+15 would hide a card).
+                $plain = is_float($value) && floor($value) === $value && abs($value) < 1e19
+                    ? sprintf('%.0f', $value)
+                    : (string) $value;
+                $masked = $this->text($plain);
+                if ($masked !== $plain) {
                     $data[$key] = $masked;
                 }
             }
@@ -183,6 +197,10 @@ class PiiProtectionScrubber implements Scrubber
         if (strlen($text) < 6) {
             return $text;
         }
+
+        $text = $this->replace(self::KEY_VALUE, $text, fn (array $m): string => $this->sensitiveKey($m[1])
+            ? $m[1].$m[2].$this->mask->mask($m[3])
+            : $m[0]);
 
         foreach (self::CREDENTIALS as [$regex, $group]) {
             $text = $this->replace($regex, $text, function (array $m) use ($group): string {
@@ -211,18 +229,23 @@ class PiiProtectionScrubber implements Scrubber
         return implode('', $parts);
     }
 
-    /**
-     * A whitespace token that is URL-, HTML-entity- or JSON-escape-encoded and decodes to
-     * PII (ali%40example.com, ali&#64;example.com) is masked whole. Masks never add or
-     * remove whitespace, so the tokens of $masked and $original line up by index.
-     */
-    private function maskDecoded(string $masked, string $original): string
+    private function scan(string $text, int $depth): string
     {
-        if (strpbrk($original, '%&\\') === false) {
+        return $this->maskEncoded($this->maskPlain($text), $text, $depth);
+    }
+
+    /**
+     * A whitespace token that is percent-, HTML-entity- or \u0040 / \x40-escaped and whose
+     * decoded form contains PII (ali%40example.com, ali&#64;example.com) is masked whole.
+     * Masks never add or remove whitespace, so the tokens of $masked and $original line up.
+     */
+    private function maskEncoded(string $masked, string $original, int $depth): string
+    {
+        if ($depth >= self::MAX_DECODE_DEPTH || ! $this->hasEscape($original)) {
             return $masked;
         }
 
-        $split = '/(\s+)/';
+        $split = '/([ \t\r\n]+)/';
         $orig = preg_split($split, $original, -1, PREG_SPLIT_DELIM_CAPTURE);
         $out = preg_split($split, $masked, -1, PREG_SPLIT_DELIM_CAPTURE);
         if ($orig === false || $out === false || count($orig) !== count($out)) {
@@ -230,30 +253,32 @@ class PiiProtectionScrubber implements Scrubber
         }
 
         foreach ($orig as $i => $token) {
-            if (strlen($token) >= 6 && strpbrk($token, '%&\\') !== false) {
-                $decoded = $this->decode($token);
-                if ($decoded !== $token && $this->maskPlain($decoded) !== $decoded) {
-                    $out[$i] = str_repeat('*', strlen($token));
-                }
+            if ($i % 2 === 0 && $this->hasEscape($token) && $this->hidesPii($token, $depth)) {
+                $out[$i] = str_repeat('*', mb_strlen($token, 'UTF-8'));
             }
         }
 
         return implode('', $out);
     }
 
-    /** Up to three rounds, so double-encoding (%2540) does not hide an '@'. */
-    private function decode(string $s): string
+    private function hasEscape(string $s): bool
     {
-        for ($i = 0; $i < 3; $i++) {
-            $next = html_entity_decode(rawurldecode($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $next = $this->replace('/\\\\u([0-9a-fA-F]{4})/', $next, fn (array $m): string => mb_chr((int) hexdec($m[1]), 'UTF-8') ?: $m[0]);
-            if ($next === $s) {
-                break;
+        return strpbrk($s, '%&') !== false || stripos($s, '\\u0040') !== false || stripos($s, '\\x40') !== false;
+    }
+
+    /** Same candidates as Go: HTML-unescaped, then path- and query-unescaped; each scanned one level deeper. */
+    private function hidesPii(string $token, int $depth): bool
+    {
+        $h = html_entity_decode($token, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $h = str_ireplace(['\\u0040', '\\x40'], '@', $h);
+
+        foreach ([$h, rawurldecode($h), urldecode($h)] as $candidate) {
+            if ($candidate !== '' && $candidate !== $token && $this->scan($candidate, $depth + 1) !== $candidate) {
+                return true;
             }
-            $s = $next;
         }
 
-        return $s;
+        return false;
     }
 
     /** preg_replace_callback that throws instead of silently returning null on a regex error. */
