@@ -9,6 +9,7 @@ use G8Scope\Core\Alerting\AlertDispatcher;
 use G8Scope\Core\Apm\EloquentApmStore;
 use G8Scope\Core\Billing\ManualBillingProvider;
 use G8Scope\Core\Billing\StripeBillingProvider;
+use G8Scope\Core\Console\MaintainOccurrencesCommand;
 use G8Scope\Core\Contracts\ApmStore;
 use G8Scope\Core\Contracts\BillingProvider;
 use G8Scope\Core\Contracts\EndpointResolver;
@@ -44,9 +45,10 @@ use G8Scope\Core\Observers\ProjectObserver;
 use G8Scope\Core\Privacy\PiiProtectionScrubber;
 use G8Scope\Core\Reporting\FilesystemReportGenerator;
 use G8Scope\Core\Rum\EloquentRumStore;
-use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
 use G8Scope\Core\Stores\EloquentIssueStore;
+use G8Scope\Core\Stores\PostgresOccurrenceStore;
 use G8Scope\Core\Support\G8DeskSupportProvider;
+use Illuminate\Console\Scheduling\Schedule;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -59,6 +61,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         $package
             ->name('g8scope')
             ->hasConfigFile()
+            ->hasCommand(MaintainOccurrencesCommand::class)
             ->discoversMigrations();
     }
 
@@ -94,6 +97,11 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         Project::observe(ProjectObserver::class);
+
+        // Occurrence partitions + retention, daily, wherever the host app runs its scheduler.
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('g8scope:occurrences:maintain')->daily()->withoutOverlapping();
+        });
 
         // Ensure migrations load for consumers and tests (not just publishable).
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
@@ -148,17 +156,8 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
 
     private function bindOccurrenceStore(): void
     {
-        $this->app->singleton(ClickHouseOccurrenceStore::class, function ($app) {
-            $class = config('g8scope.drivers.occurrence_store');
-            if ($class) {
-                return $app->make($class);
-            }
-
-            return ClickHouseOccurrenceStore::fromConfig((array) config('g8scope.clickhouse', []));
-        });
-
-        $this->app->alias(ClickHouseOccurrenceStore::class, OccurrenceStore::class);
-        $this->app->alias(ClickHouseOccurrenceStore::class, OccurrenceWriter::class);
+        $this->bindDriver(OccurrenceStore::class, 'occurrence_store', fn () => new PostgresOccurrenceStore);
+        $this->app->alias(OccurrenceStore::class, OccurrenceWriter::class);
     }
 
     private function bindNotifier(): void

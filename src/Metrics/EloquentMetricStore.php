@@ -8,8 +8,8 @@ use G8Scope\Core\Contracts\MetricStore;
 use G8Scope\Core\Models\MetricPoint;
 
 /**
- * Eloquent/Postgres MetricStore driver (spec §8, §18). The production driver is
- * ClickHouse (fed by the Go ingest API). Daily aggregation is grouped in SQL via
+ * Eloquent/Postgres MetricStore driver (spec §8, §18) — the production driver
+ * (Postgres; rows fed by the Go ingest API). Daily aggregation is grouped in SQL via
  * date() so it works on SQLite (tests) + Postgres.
  */
 class EloquentMetricStore implements MetricStore

@@ -16,7 +16,6 @@ flowchart LR
   Web["g8scope-app (dashboard)"] --> Core["g8scope/core (this)"]
   MCP["g8scope-mcp"] -->|gated writes via web internal API| Web
   Core -. drivers .-> PG[("Postgres")]
-  Core -. read drivers .-> CH[("ClickHouse")]
 ```
 
 The MCP never writes the DB directly; it delegates to the web app, which executes through core.
@@ -38,7 +37,7 @@ Single source of truth for mutations + audit + PII scrub.
 | Concern | Store | Direction here |
 |---|---|---|
 | Accounts, projects, members, ingest keys, **issues**, entitlements, alert rules, reports | PostgreSQL | read + write |
-| **Occurrences**, rollups, sparklines | ClickHouse | **read only** (the Go ingest API writes) |
+| **Occurrences**, sparklines, counts-over-time | PostgreSQL (`occurrences`, partitioned monthly by `occurred_at`) | read (+ write for app/tests); the Go ingest API writes in production. Retention drops whole partitions daily (`g8scope:occurrences:maintain`) |
 
 ## Driver binding
 

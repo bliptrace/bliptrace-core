@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace G8Scope\Core\Contracts;
 
 /**
- * Custom business-metrics store (spec §8, #34). Driver-based: ClickHouse via the
- * Go ingest API in production; an Eloquent driver backs dev/tests. Records named
+ * Custom business-metrics store (spec §8, #34). Driver-based: Postgres (rows from
+ * the Go ingest API) via the Eloquent driver in production and tests. Records named
  * numeric data points and answers aggregate series.
  */
 interface MetricStore

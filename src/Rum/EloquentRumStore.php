@@ -8,8 +8,8 @@ use G8Scope\Core\Contracts\RumStore;
 use G8Scope\Core\Models\WebVital;
 
 /**
- * Eloquent/Postgres RumStore driver (spec §8, §18). The production driver is
- * ClickHouse (fed by the Go ingest API + browser SDK). Ratings use the standard
+ * Eloquent/Postgres RumStore driver (spec §8, §18) — the production driver
+ * (Postgres; rows fed by the Go ingest API + browser SDK). Ratings use the standard
  * Web-Vitals good/poor thresholds.
  */
 class EloquentRumStore implements RumStore
