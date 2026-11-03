@@ -6,7 +6,7 @@ namespace G8Scope\Core\Contracts;
 
 /**
  * Transaction-performance store (spec §8, APM — P3). Driver-based: the Go ingest
- * API + ClickHouse is the production driver; an Eloquent driver backs dev/tests.
+ * API writes Postgres; the Eloquent driver reads it in production and tests.
  * Records transaction timings and answers latency/Apdex summaries.
  */
 interface ApmStore

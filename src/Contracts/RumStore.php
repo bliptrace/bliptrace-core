@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace G8Scope\Core\Contracts;
 
 /**
- * Real-User-Monitoring store (spec §8, RUM — P3). Driver-based: ClickHouse via the
- * Go ingest API (fed by the browser SDK) in production; Eloquent backs dev/tests.
+ * Real-User-Monitoring store (spec §8, RUM — P3). Driver-based: Postgres (rows from
+ * the Go ingest API, fed by the browser SDK) via the Eloquent driver in prod and tests.
  * Records Web-Vitals beacons and answers per-metric averages + ratings.
  */
 interface RumStore

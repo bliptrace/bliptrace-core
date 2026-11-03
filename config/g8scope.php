@@ -14,7 +14,7 @@ return [
         'fingerprinter' => null,   // implements G8Scope\Core\Contracts\Fingerprinter
         'scrubber' => null,        // implements G8Scope\Core\Contracts\Scrubber
         'issue_store' => null,     // implements G8Scope\Core\Contracts\IssueStore (Postgres)
-        'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (ClickHouse)
+        'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (Postgres)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
         // BillingProvider: 'stripe' selects the Stripe one-time Checkout driver;
@@ -76,12 +76,10 @@ return [
         'product' => env('G8SCOPE_G8DESK_PRODUCT'),
     ],
 
-    // ClickHouse connection for the OccurrenceStore driver (occurrences live in CH).
-    'clickhouse' => [
-        'host' => env('G8SCOPE_CH_HOST', '127.0.0.1'),
-        'port' => (int) env('G8SCOPE_CH_PORT', 8123),
-        'username' => env('G8SCOPE_CH_USER', 'default'),
-        'password' => env('G8SCOPE_CH_PASS', ''),
-        'database' => env('G8SCOPE_CH_DB', 'g8scope'),
+    // Occurrences live in Postgres, partitioned monthly. g8scope:occurrences:maintain
+    // (scheduled daily) drops partitions older than this; the longest entitlement
+    // retention_days wins if higher. 14 = spec §13 shared-tier figure (illustrative).
+    'occurrences' => [
+        'retention_days' => (int) env('G8SCOPE_OCCURRENCES_RETENTION_DAYS', 14),
     ],
 ];

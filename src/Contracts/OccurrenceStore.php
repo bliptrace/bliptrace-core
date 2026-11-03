@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace G8Scope\Core\Contracts;
 
 /**
- * Occurrence access in ClickHouse (spec §8). Append-only; the web app reads,
- * the Go ingest API writes. One issue groups thousands of occurrences.
+ * Occurrence access in Postgres (`occurrences`, partitioned monthly). Append-only;
+ * the web app reads, the Go ingest API writes. One issue groups thousands of occurrences.
  */
 interface OccurrenceStore
 {

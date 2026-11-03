@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace G8Scope\Core\Actions;
 
+use Carbon\CarbonImmutable;
 use G8Scope\Core\Alerting\AlertDispatcher;
 use G8Scope\Core\Contracts\Fingerprinter;
 use G8Scope\Core\Contracts\IssueStore;
@@ -51,9 +52,7 @@ class RecordOccurrence
             'environment' => $envelope['environment'] ?? '',
             'release' => $envelope['release'] ?? '',
             'message' => $exception['message'] ?? '',
-            'occurred_at' => isset($envelope['occurred_at'])
-                ? date('Y-m-d H:i:s.v', strtotime((string) $envelope['occurred_at']))
-                : date('Y-m-d H:i:s.v'),
+            'occurred_at' => CarbonImmutable::parse($envelope['occurred_at'] ?? 'now')->utc()->format('Y-m-d H:i:s.v\\Z'),
             'payload' => $envelope,
         ]);
 

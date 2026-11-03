@@ -7,12 +7,12 @@ use G8Scope\Core\Contracts\OccurrenceStore;
 use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     Http::fake();
-    app(OccurrenceStore::class)->migrate();
     $account = Account::create(['name' => 'DevHub']);
     $this->project = $account->projects()->create(['name' => 'P']);
     $this->project->alertRules()->create([
@@ -39,12 +39,12 @@ function envelope(string $eventId): array
 }
 
 it('runs scrub → fingerprint → issue → occurrence → alert end-to-end', function (): void {
-    $issue = ($this->record)($this->project->id, envelope('e1'));
+    $issue = ($this->record)($this->project->id, envelope((string) Str::uuid()));
 
     expect($issue->occurrences_count)->toBe(1)
         ->and($issue->type)->toBe('RuntimeException');
 
-    // occurrence landed in ClickHouse with PII scrubbed in the payload
+    // occurrence landed in Postgres with PII scrubbed in the payload
     $rows = iterator_to_array((fn () => yield from app(OccurrenceStore::class)->forIssue($issue->uuid, 10))());
     expect($rows)->toHaveCount(1)
         ->and($rows[0]['payload'])->not->toContain('hunter2')
@@ -54,9 +54,17 @@ it('runs scrub → fingerprint → issue → occurrence → alert end-to-end', f
     Http::assertSentCount(1);
 });
 
+it('records a replayed event_id once (idempotent retry)', function (): void {
+    $id = (string) Str::uuid();
+    ($this->record)($this->project->id, envelope($id));
+    $issue = ($this->record)($this->project->id, envelope($id));
+
+    expect([...app(OccurrenceStore::class)->forIssue($issue->uuid, 10)])->toHaveCount(1);
+});
+
 it('collapses a flood into one alert (smart grouping)', function (): void {
     foreach (range(1, 5) as $i) {
-        $issue = ($this->record)($this->project->id, envelope("e{$i}"));
+        $issue = ($this->record)($this->project->id, envelope((string) Str::uuid()));
     }
 
     expect($issue->occurrences_count)->toBe(5);

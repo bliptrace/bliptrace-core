@@ -40,14 +40,5 @@ class TestCase extends Orchestra
         // owen-it/laravel-auditing skips auditing in console by default; tests run
         // in console, so enable it here.
         $app['config']->set('audit.console', true);
-
-        // --- ClickHouse (occurrences) — consumed by the OccurrenceStore driver ---
-        $app['config']->set('g8scope.clickhouse', [
-            'host' => env('G8SCOPE_CH_HOST', '127.0.0.1'),
-            'port' => (int) env('G8SCOPE_CH_PORT', '8123'),
-            'username' => env('G8SCOPE_CH_USER', 'g8scope'),
-            'password' => env('G8SCOPE_CH_PASS', 'g8scope'),
-            'database' => env('G8SCOPE_CH_DB', 'g8scope_core_test'),
-        ]);
     }
 }

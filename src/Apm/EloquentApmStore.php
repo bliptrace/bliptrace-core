@@ -9,8 +9,8 @@ use G8Scope\Core\Models\Transaction;
 
 /**
  * Eloquent/Postgres ApmStore driver (spec §8, §18). Percentiles are computed in
- * PHP so the same driver works on SQLite (tests) and Postgres. The production
- * driver is ClickHouse (fed by the Go ingest API).
+ * PHP so the same driver works on SQLite (tests) and Postgres. This is the
+ * production driver (Postgres; rows fed by the Go ingest API).
  */
 class EloquentApmStore implements ApmStore
 {

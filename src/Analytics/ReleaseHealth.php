@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace G8Scope\Core\Analytics;
 
 use G8Scope\Core\Models\Issue;
-use G8Scope\Core\Stores\ClickHouseOccurrenceStore;
+use G8Scope\Core\Stores\PostgresOccurrenceStore;
 
 /**
  * Compare error health across two releases (spec §8, P3): new issues introduced and
- * the change in occurrence volume. New issues from PG; occurrence counts from CH.
+ * the change in occurrence volume. Both from Postgres (issues + occurrences).
  */
 class ReleaseHealth
 {
-    public function __construct(private readonly ClickHouseOccurrenceStore $occurrences) {}
+    public function __construct(private readonly PostgresOccurrenceStore $occurrences) {}
 
     /** @return array<string,mixed> */
     public function compare(int $projectId, string $before, string $after): array

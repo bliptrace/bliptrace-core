@@ -23,24 +23,9 @@ jobs:
           --health-cmd "pg_isready -U g8scope -d g8scope_core_test"
           --health-interval 5s --health-timeout 5s --health-retries 10
 
-      clickhouse:
-        image: clickhouse/clickhouse-server:24-alpine
-        env:
-          CLICKHOUSE_USER: g8scope
-          CLICKHOUSE_PASSWORD: g8scope
-          CLICKHOUSE_DB: g8scope_core_test
-          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-        ports:
-          - 8123:8123
-        options: >-
-          --health-cmd "wget --spider -q http://127.0.0.1:8123/ping"
-          --health-interval 5s --health-timeout 5s --health-retries 10
-
     env:
       G8SCOPE_PG_HOST: 127.0.0.1
       G8SCOPE_PG_PORT: 5432
-      G8SCOPE_CH_HOST: 127.0.0.1
-      G8SCOPE_CH_PORT: 8123
 
     steps:
       # Multi-repo: core depends on g8scope-contracts via a sibling path repository,
@@ -77,6 +62,6 @@ jobs:
         working-directory: g8scope-core
         run: composer analyse
 
-      - name: Pest (tests against real PG + ClickHouse)
+      - name: Pest (tests against real Postgres)
         working-directory: g8scope-core
         run: composer test
