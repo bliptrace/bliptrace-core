@@ -121,12 +121,6 @@ parameters:
 			path: src/Observers/ProjectObserver.php
 
 		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Privacy/PiiProtectionScrubber.php
-
-		-
 			message: '#^Access to an undefined property G8Scope\\Core\\Models\\Issue\:\:\$last_seen_at\.$#'
 			identifier: property.notFound
 			count: 1
