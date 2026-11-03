@@ -6,6 +6,7 @@ use G8Scope\Core\Actions\RecordOccurrence;
 use G8Scope\Core\Contracts\OccurrenceStore;
 use G8Scope\Core\Models\Account;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -52,6 +53,18 @@ it('runs scrub → fingerprint → issue → occurrence → alert end-to-end', f
 
     // one alert for the new issue
     Http::assertSentCount(1);
+});
+
+it('stores an event_id whose last group is all digits (not masked by the scrubber)', function (): void {
+    $id = '86be23b5-5e80-4186-8020-161900506889';
+
+    $issue = ($this->record)($this->project->id, envelope($id));
+
+    $rows = [...app(OccurrenceStore::class)->forIssue($issue->uuid, 10)];
+    expect(DB::getDriverName())->toBe('pgsql')
+        ->and($rows)->toHaveCount(1)
+        ->and($rows[0]['event_id'])->toBe($id)
+        ->and($rows[0]['payload'])->not->toContain('hunter2');
 });
 
 it('records a replayed event_id once (idempotent retry)', function (): void {
