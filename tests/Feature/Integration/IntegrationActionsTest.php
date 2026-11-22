@@ -5,11 +5,14 @@ declare(strict_types=1);
 use G8Scope\Core\Actions\ArchiveProject;
 use G8Scope\Core\Actions\CreateProject;
 use G8Scope\Core\Actions\IssueIngestKey;
+use G8Scope\Core\Actions\PurgeProject;
 use G8Scope\Core\Actions\RecordDeploy;
 use G8Scope\Core\Actions\RevokeIngestKey;
 use G8Scope\Core\Models\Account;
 use G8Scope\Core\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -83,4 +86,35 @@ it('records a deploy marker', function (): void {
     expect($deploy->uuid)->not->toBeNull()
         ->and($deploy->deployed_at)->not->toBeNull()
         ->and($project->deploys()->count())->toBe(1);
+});
+
+it('purges an archived project and every orphan-prone row, leaving other projects alone', function (): void {
+    $account = integrationAccount();
+    [$doomed] = app(CreateProject::class)($account, 'doomed');
+    [$kept] = app(CreateProject::class)($account, 'kept');
+
+    foreach ([$doomed, $kept] as $project) {
+        $issue = $project->issues()->create(['fingerprint' => 'fp-'.$project->id, 'type' => 'RuntimeException', 'level' => 'error', 'first_seen_at' => now(), 'last_seen_at' => now()]);
+
+        foreach (range(1, 3) as $i) {
+            DB::table('occurrences')->insert([
+                'event_id' => (string) Str::uuid(), 'project_id' => $project->id, 'issue_uuid' => $issue->uuid,
+                'fingerprint' => 'fp', 'level' => 'error', 'occurred_at' => now()->subDays($i), 'payload' => '{}',
+            ]);
+        }
+        $row = ['uuid' => (string) Str::uuid(), 'project_id' => $project->id];
+        DB::table('web_vitals')->insert($row + ['metric' => 'lcp', 'value' => 1.0, 'occurred_at' => now()]);
+        DB::table('transactions')->insert($row + ['name' => 'GET /', 'duration_ms' => 5, 'occurred_at' => now()]);
+        DB::table('metric_points')->insert($row + ['name' => 'm', 'value' => 1.0, 'recorded_at' => now()]);
+    }
+
+    app(ArchiveProject::class)($doomed);
+    app(PurgeProject::class)($doomed, chunk: 2);
+
+    expect(Project::withTrashed()->find($doomed->id))->toBeNull();
+
+    foreach (['occurrences' => 3, 'web_vitals' => 1, 'transactions' => 1, 'metric_points' => 1, 'issues' => 1] as $table => $keptCount) {
+        expect(DB::table($table)->where('project_id', $doomed->id)->count())->toBe(0, $table)
+            ->and(DB::table($table)->where('project_id', $kept->id)->count())->toBe($keptCount, $table);
+    }
 });
