@@ -1,0 +1,39 @@
+version: 2
+
+# Private bliptrace-* packages: add GH_PAT to the org's *Dependabot* secrets.
+registries:
+  github-bliptrace:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{ secrets.GH_PAT }}
+
+updates:
+  - package-ecosystem: "composer"
+    directory: "/"
+    registries:
+      - github-bliptrace
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 5
+    groups:
+      laravel:
+        patterns:
+          - "illuminate/*"
+          - "orchestra/*"
+          - "pestphp/*"
+          - "larastan/*"
+      composer-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
