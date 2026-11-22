@@ -3,7 +3,7 @@
 The **domain layer** for [g8scope](https://g8suite.com) — the central, runtime-agnostic
 error-capture platform by Developers Hub Sdn Bhd. A Laravel composer package.
 
-> `g8scope-app` (the web dashboard) depends on this package. The `g8scope-mcp` server delegates its
+> `bliptrace-app` (the web dashboard) depends on this package. The `bliptrace-mcp` server delegates its
 > gated writes to the web app, which executes them through this package — so **mutations, audit and
 > PII scrub are single-sourced here** and the dashboard never drifts from the MCP. See spec §5, §18.
 

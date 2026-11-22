@@ -4,7 +4,7 @@ declare(strict_types=1);
 use G8Scope\Core\Billing\StripeBillingProvider;
 
 /*
- * g8scope-core configuration.
+ * bliptrace-core configuration.
  *
  * Driver-based seams: each contract resolves to a concrete implementation. The
  * web app binds production drivers; tests bind array/stub drivers. See spec §18.

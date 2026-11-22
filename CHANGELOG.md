@@ -7,7 +7,7 @@ All notable changes to `g8scope/core` will be documented in this file.
 ## [0.2.3] - 2026-11-03
 
 ### Fixed
-- Scrubber parity with the Go ingest scrubber (`g8scope-api` 4af40fa); the Pest vectors
+- Scrubber parity with the Go ingest scrubber (`bliptrace-api` 4af40fa); the Pest vectors
   now mirror `scrub_test.go` TestText / TestScrub one for one (same names, order, outputs):
   - free-text `<word>[=:]value` uses the same key rule as key names (so `monkey=5`,
     `keyboard_layout=us` are kept, `X-Api-Key: …` is masked); a `Bearer `/`Basic ` prefix is
@@ -23,7 +23,7 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [0.2.2] - 2026-11-03
 
-Security-review fixes F1–F5. The scrubber changes mirror `g8scope-api/internal/scrub`;
+Security-review fixes F1–F5. The scrubber changes mirror `bliptrace-api/internal/scrub`;
 both are tested against the same vectors.
 
 ### Security
@@ -63,7 +63,7 @@ both are tested against the same vectors.
 
 ### Fixed
 - `PiiProtectionScrubber` now masks exactly like the Go ingest scrubber
-  (`g8scope-api/internal/scrub`), tested against the same vectors:
+  (`bliptrace-api/internal/scrub`), tested against the same vectors:
   - cards: only Luhn-valid 13–19 digit runs (arbitrary 16-digit ids are kept);
   - MyKad/IC: undashed 12-digit form with a valid month/day guard;
   - phones: MY `+60`/`60`/`0` with space or dash groups, and generic E.164;

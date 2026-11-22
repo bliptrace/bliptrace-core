@@ -28,19 +28,19 @@ jobs:
       G8SCOPE_PG_PORT: 5432
 
     steps:
-      # Multi-repo: core depends on g8scope-contracts via a sibling path repository,
+      # Multi-repo: core depends on bliptrace-contracts via a sibling path repository,
       # so check both out side by side. GH_PAT must grant read on the private
       # contracts repo (a fine-grained PAT or org token).
       - name: Checkout core
         uses: actions/checkout@v4
         with:
-          path: g8scope-core
+          path: bliptrace-core
 
       - name: Checkout contracts (path dependency)
         uses: actions/checkout@v4
         with:
-          repository: developers-hub-my/g8scope-contracts
-          path: g8scope-contracts
+          repository: bliptrace/bliptrace-contracts
+          path: bliptrace-contracts
           token: ${{ secrets.GH_PAT }}
 
       - name: Setup PHP
@@ -51,17 +51,17 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        working-directory: g8scope-core
+        working-directory: bliptrace-core
         run: composer update --prefer-dist --no-interaction --no-progress
 
       - name: Pint (code style)
-        working-directory: g8scope-core
+        working-directory: bliptrace-core
         run: composer lint
 
       - name: PHPStan (static analysis)
-        working-directory: g8scope-core
+        working-directory: bliptrace-core
         run: composer analyse
 
       - name: Pest (tests against real Postgres)
-        working-directory: g8scope-core
+        working-directory: bliptrace-core
         run: composer test

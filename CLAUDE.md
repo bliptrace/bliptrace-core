@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this repo is
 
 `g8scope/core` is the **Laravel domain package** for g8scope (Developers Hub Sdn Bhd). It holds **all**
-Laravel-side domain logic so it is single-sourced: `g8scope-app` (web dashboard) depends on it, and
-`g8scope-mcp`'s gated writes delegate to the web app, which runs them through this package. That is
+Laravel-side domain logic so it is single-sourced: `bliptrace-app` (web dashboard) depends on it, and
+`bliptrace-mcp`'s gated writes delegate to the web app, which runs them through this package. That is
 what stops the dashboard and the MCP from drifting (spec §5, §18).
 
 One of five repos (multi-repo build). The platform spec is the source of truth; the component view is
@@ -67,9 +67,9 @@ suite runs core migrations on SQLite `:memory:`.
 | `ReportGenerator` | Snapshot report | pdf/csv driver |
 | `Notifier` | Multi-channel alerts | email/Slack/Telegram/webhook |
 
-## Relationship to g8scope-contracts
+## Relationship to bliptrace-contracts
 
-The error-envelope **shape** is owned by `g8scope-contracts` (JSON Schema). When this package needs
+The error-envelope **shape** is owned by `bliptrace-contracts` (JSON Schema). When this package needs
 envelope DTOs, derive them from that pinned schema — do not redefine the envelope here.
 
 ## Phase scope (features matrix → this package)
@@ -83,4 +83,4 @@ envelope DTOs, derive them from that pinned schema — do not redefine the envel
 ## Do NOT
 
 Reimplement mutations outside this package (the MCP must delegate, not fork). Add envelope field
-definitions here (they live in `g8scope-contracts`). Write occurrences (the Go api does that).
+definitions here (they live in `bliptrace-contracts`). Write occurrences (the Go api does that).

@@ -53,7 +53,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../g8scope-contracts",
+            "url": "../bliptrace-contracts",
             "options": {
                 "symlink": true
             }

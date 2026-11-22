@@ -6,15 +6,15 @@
 
 ## Why this package exists
 
-g8scope has two surfaces that mutate domain state: the **web dashboard** (`g8scope-app`) and the
-**MCP** (`g8scope-mcp`, P2 gated writes). If each implemented mutations itself, they would drift —
+g8scope has two surfaces that mutate domain state: the **web dashboard** (`bliptrace-app`) and the
+**MCP** (`bliptrace-mcp`, P2 gated writes). If each implemented mutations itself, they would drift —
 different audit, different scrub, different rules. So **all** Laravel-side domain logic lives here,
 once, and both surfaces use it:
 
 ```mermaid
 flowchart LR
-  Web["g8scope-app (dashboard)"] --> Core["g8scope/core (this)"]
-  MCP["g8scope-mcp"] -->|gated writes via web internal API| Web
+  Web["bliptrace-app (dashboard)"] --> Core["g8scope/core (this)"]
+  MCP["bliptrace-mcp"] -->|gated writes via web internal API| Web
   Core -. drivers .-> PG[("Postgres")]
 ```
 
@@ -45,7 +45,7 @@ Single source of truth for mutations + audit + PII scrub.
 its service provider; tests bind array/stub drivers. This is the "driver-based abstractions
 everywhere" rule (spec §17) and what makes the domain testable without real PG/CH.
 
-## Boundary with g8scope-contracts
+## Boundary with bliptrace-contracts
 
-The **envelope shape** is owned by `g8scope-contracts` (versioned JSON Schema). Envelope DTOs used
+The **envelope shape** is owned by `bliptrace-contracts` (versioned JSON Schema). Envelope DTOs used
 here derive from that pinned schema; the envelope is never redefined in this package.

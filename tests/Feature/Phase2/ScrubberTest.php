@@ -45,7 +45,7 @@ it('leaves identifier fields intact while still masking PII around them', functi
         ->and($out['context']['user']['password'])->toBe('[REDACTED]');
 });
 
-// The vectors below mirror g8scope-api/internal/scrub/scrub_test.go (TestText / TestScrub)
+// The vectors below mirror bliptrace-api/internal/scrub/scrub_test.go (TestText / TestScrub)
 // so the Go ingest scrubber and this one are tested against the same inputs AND outputs.
 // Keep them identical: a change here is a change there (security-review 0.2.2 F1/F2).
 const DIGIT_TAIL_UUID = '53a33b29-3630-48c1-83f2-123456789012';

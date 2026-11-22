@@ -29,7 +29,7 @@ use RuntimeException;
  * Known gap, shared with Go: camelCase keys (accessKey, apiToken is fine — token is a
  * substring) are not split, so `accessKey` is not redacted by name.
  *
- * The patterns mirror the Go ingest scrubber (g8scope-api/internal/scrub) so the
+ * The patterns mirror the Go ingest scrubber (bliptrace-api/internal/scrub) so the
  * dashboard and the ingest path mask identically. event_id / occurred_at are skipped
  * only at the top level of the envelope (typed uuid / timestamptz columns).
  */
