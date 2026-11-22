@@ -4,6 +4,15 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-22
+
+### Added
+- `PurgeProject` action: permanently deletes a project after it has been archived, purging the
+  FK-less append-only tables (`occurrences`, `web_vitals`, `transactions`, `metric_points`, plus any
+  host-app tables passed in) in chunks by `project_id`, then force-deleting the project row (FK
+  tables cascade). Run it delayed after `ArchiveProject`, never in place of it: the Go ingest caches
+  key lookups, so an immediate hard delete breaks the next multi-tenant flush on the issues FK.
+
 ## [0.3.0] - 2026-11-22
 
 ### Added
