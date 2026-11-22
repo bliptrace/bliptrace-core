@@ -4,6 +4,15 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-23
+
+### Changed
+- Environment variables renamed from `G8SCOPE_*` to `BLIPTRACE_*` (same suffix): `BLIPTRACE_API_URL`,
+  `BLIPTRACE_MCP_URL`, `BLIPTRACE_BILLING_DRIVER`, `BLIPTRACE_BILLING_SUCCESS_URL`, `BLIPTRACE_BILLING_CANCEL_URL`,
+  `BLIPTRACE_BILLING_TAX`, `BLIPTRACE_DEFAULT_FREE_SEATS`, `BLIPTRACE_G8DESK_URL`/`_TOKEN`/`_ORG`/`_PRODUCT`,
+  `BLIPTRACE_OCCURRENCES_RETENTION_DAYS`, and the test-only `BLIPTRACE_PG_*`. The old `G8SCOPE_*` names are still
+  read as a fallback and will be removed once production is switched. Config keys (`config('g8scope.*')`) are unchanged.
+
 ## [0.3.1] - 2026-11-22
 
 ### Added
