@@ -19,7 +19,7 @@ return [
         'entitlement_gate' => null,
         // BillingProvider: 'stripe' selects the Stripe one-time Checkout driver;
         // anything else (or unset) falls back to ManualBillingProvider (admin unlock).
-        'billing_provider' => env('G8SCOPE_BILLING_DRIVER') === 'stripe'
+        'billing_provider' => env('BLIPTRACE_BILLING_DRIVER', env('G8SCOPE_BILLING_DRIVER')) === 'stripe'
             ? StripeBillingProvider::class
             : null,
         'apm_store' => null,        // implements G8Scope\Core\Contracts\ApmStore
@@ -36,12 +36,12 @@ return [
 
     // Free seats granted to a new account (owner is always free on top of this).
     // The web app overrides this from a DB setting so admins can change the default.
-    'default_free_seats' => (int) env('G8SCOPE_DEFAULT_FREE_SEATS', 3),
+    'default_free_seats' => (int) env('BLIPTRACE_DEFAULT_FREE_SEATS', env('G8SCOPE_DEFAULT_FREE_SEATS', 3)),
 
     // Default (shared) endpoints provisioned for every new project (Project Observer).
     'endpoints' => [
-        'api' => env('G8SCOPE_API_URL', 'https://ingest.scope.g8suite.com'),
-        'mcp' => env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com'),
+        'api' => env('BLIPTRACE_API_URL', env('G8SCOPE_API_URL', 'https://ingest.scope.g8suite.com')),
+        'mcp' => env('BLIPTRACE_MCP_URL', env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com')),
     ],
 
     // Billing (BillingProvider driver) — spec §12–13. One-time, permanent
@@ -61,25 +61,25 @@ return [
         ],
         // Where Stripe returns the customer after checkout. `{CHECKOUT_SESSION_ID}`
         // in the success URL is substituted by Stripe.
-        'success_url' => env('G8SCOPE_BILLING_SUCCESS_URL'),
-        'cancel_url' => env('G8SCOPE_BILLING_CANCEL_URL'),
+        'success_url' => env('BLIPTRACE_BILLING_SUCCESS_URL', env('G8SCOPE_BILLING_SUCCESS_URL')),
+        'cancel_url' => env('BLIPTRACE_BILLING_CANCEL_URL', env('G8SCOPE_BILLING_CANCEL_URL')),
         // Stripe Tax (automatic_tax) on checkout. Requires Stripe Tax activated +
         // tax registrations in the Stripe account. Off by default.
-        'tax_enabled' => (bool) env('G8SCOPE_BILLING_TAX', false),
+        'tax_enabled' => (bool) env('BLIPTRACE_BILLING_TAX', env('G8SCOPE_BILLING_TAX', false)),
     ],
 
     // g8desk support integration (SupportProvider driver) — spec §15.
     'g8desk' => [
-        'base_url' => env('G8SCOPE_G8DESK_URL', ''),
-        'token' => env('G8SCOPE_G8DESK_TOKEN'),
-        'organization' => env('G8SCOPE_G8DESK_ORG'),
-        'product' => env('G8SCOPE_G8DESK_PRODUCT'),
+        'base_url' => env('BLIPTRACE_G8DESK_URL', env('G8SCOPE_G8DESK_URL', '')),
+        'token' => env('BLIPTRACE_G8DESK_TOKEN', env('G8SCOPE_G8DESK_TOKEN')),
+        'organization' => env('BLIPTRACE_G8DESK_ORG', env('G8SCOPE_G8DESK_ORG')),
+        'product' => env('BLIPTRACE_G8DESK_PRODUCT', env('G8SCOPE_G8DESK_PRODUCT')),
     ],
 
     // Occurrences live in Postgres, partitioned monthly. g8scope:occurrences:maintain
     // (scheduled daily) drops partitions older than this; the longest entitlement
     // retention_days wins if higher. 14 = spec §13 shared-tier figure (illustrative).
     'occurrences' => [
-        'retention_days' => (int) env('G8SCOPE_OCCURRENCES_RETENTION_DAYS', 14),
+        'retention_days' => (int) env('BLIPTRACE_OCCURRENCES_RETENTION_DAYS', env('G8SCOPE_OCCURRENCES_RETENTION_DAYS', 14)),
     ],
 ];

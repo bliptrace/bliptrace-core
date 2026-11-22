@@ -150,7 +150,7 @@ class G8ScopeCoreServiceProvider extends PackageServiceProvider
         );
 
         // config('g8scope.drivers.billing_provider') resolves to StripeBillingProvider::class
-        // when G8SCOPE_BILLING_DRIVER=stripe; otherwise the manual (admin unlock) default.
+        // when BLIPTRACE_BILLING_DRIVER=stripe (G8SCOPE_* fallback); otherwise the manual (admin unlock) default.
         $this->bindDriver(BillingProvider::class, 'billing_provider', fn () => new ManualBillingProvider);
     }
 
