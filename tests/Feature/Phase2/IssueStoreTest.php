@@ -33,6 +33,7 @@ it('reopens a resolved issue and flags regression', function (): void {
     $reopened = ($this->store)->upsert($this->project->id, 'fp2', ['type' => 'E']);
     expect($reopened->status)->toBe(IssueStatus::Open)
         ->and($reopened->justRegressed)->toBeTrue()
+        ->and($reopened->regressed_at)->not->toBeNull()
         ->and($reopened->resolved_at)->toBeNull();
 });
 

@@ -4,6 +4,24 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
+### Added
+- Integration API support (bliptrace-app `/api/v1`):
+  - migration `add_integration_api_support`: `projects.external_ref` (partial unique per
+    account among live projects), `projects.environment`, `projects.deleted_at`;
+    `issues.regressed_at`; new `deploys` table + `Deploy` model (`Project::deploys()`).
+  - Actions: `CreateProject` (idempotent on `external_ref`, drops the observer's
+    unrevealable key), `IssueIngestKey` (`g8s_` prefix, hash only, plain returned once),
+    `RevokeIngestKey` (idempotent), `ArchiveProject` (soft delete + revoke keys),
+    `RecordDeploy`.
+  - `PostgresOccurrenceStore::countsSince()` — per-project event counts for a window.
+
+### Changed
+- `Project` uses `SoftDeletes`; archived projects drop out of every Eloquent query.
+- `EloquentIssueStore` stamps `regressed_at` when a resolved issue reoccurs. The Go ingest
+  (`bliptrace-api`) does not set it yet — follow-up.
+
 ## [0.2.3] - 2026-11-03
 
 ### Fixed

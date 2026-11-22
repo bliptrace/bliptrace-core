@@ -86,3 +86,14 @@ it('counts events over time across projects and per release', function (): void 
         ->and($store->eventsOverTime([]))->toBe([])
         ->and($store->countForRelease($this->projectId, 'r1'))->toBe(2);
 });
+
+it('counts occurrences per project since a point in time', function (): void {
+    $this->writer->record(($this->row)());
+    $this->writer->record(($this->row)());
+    $this->writer->record(($this->row)(['occurred_at' => now()->subDays(3)->format('Y-m-d H:i:s.v\Z')]));
+
+    $counts = app(PostgresOccurrenceStore::class)->countsSince([$this->projectId, 999], now()->subDay());
+
+    expect($counts)->toBe([$this->projectId => 2])
+        ->and(app(PostgresOccurrenceStore::class)->countsSince([], now()))->toBe([]);
+});

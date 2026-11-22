@@ -83,6 +83,28 @@ class PostgresOccurrenceStore implements OccurrenceStore, OccurrenceWriter
         return $this->table()->where('project_id', $projectId)->where('release', $release)->count();
     }
 
+    /**
+     * Occurrence counts per project since a point in time (Integration API stats).
+     *
+     * @param  array<int,int>  $projectIds
+     * @return array<int,int> project_id => count (projects without events are absent)
+     */
+    public function countsSince(array $projectIds, \DateTimeInterface $since): array
+    {
+        if ($projectIds === []) {
+            return [];
+        }
+
+        return $this->table()
+            ->whereIn('project_id', array_map('intval', $projectIds))
+            ->where('occurred_at', '>=', $since)
+            ->groupBy('project_id')
+            ->selectRaw('project_id, count(*) AS count')
+            ->pluck('count', 'project_id')
+            ->map(static fn ($count): int => (int) $count)
+            ->all();
+    }
+
     private function table(): Builder
     {
         return DB::table(self::TABLE);

@@ -34,6 +34,7 @@ class Issue extends Model implements Auditable
             'first_seen_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'resolved_at' => 'datetime',
+            'regressed_at' => 'datetime',
             'occurrences_count' => 'integer',
         ];
     }
