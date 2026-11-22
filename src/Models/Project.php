@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -16,6 +17,7 @@ class Project extends Model implements Auditable
 {
     use AuditableTrait;
     use HasDualKey;
+    use SoftDeletes;
 
     protected $guarded = [];
 
@@ -57,6 +59,11 @@ class Project extends Model implements Auditable
     public function alertRules(): HasMany
     {
         return $this->hasMany(AlertRule::class);
+    }
+
+    public function deploys(): HasMany
+    {
+        return $this->hasMany(Deploy::class);
     }
 
     public function incidents(): HasMany

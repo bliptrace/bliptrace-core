@@ -53,6 +53,7 @@ class EloquentIssueStore implements IssueStore
             if ($issue->status === IssueStatus::Resolved) {
                 $issue->status = IssueStatus::Open;
                 $issue->resolved_at = null;
+                $issue->regressed_at = $when;
                 $issue->justRegressed = true;
             }
 
