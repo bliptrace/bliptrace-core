@@ -4,6 +4,19 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-23
+
+### Changed
+- New ingest keys use the prefix `blip_` (`IssueIngestKey::PREFIX`); the old `g8s_` is kept as
+  `IssueIngestKey::LEGACY_PREFIX`. Existing `g8s_` keys keep working — the ingest API looks keys up by hash only.
+- The default key provisioned on project creation and the key re-issued by `SwitchEndpoint` now go through
+  `IssueIngestKey`, so they carry the prefix too.
+
+### Added
+- Migration `add_prefix_to_ingest_keys`: `ingest_keys.prefix` (string 16, default `g8s_`), so existing rows
+  backfill to `g8s_` and keep displaying as `g8s_…`; new keys store `blip_` explicitly. Hosts should show
+  `$key->prefix` instead of the constant.
+
 ## [0.3.2] - 2026-11-23
 
 ### Changed
