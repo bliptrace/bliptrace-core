@@ -9,6 +9,7 @@ use G8Scope\Core\Actions\PurgeProject;
 use G8Scope\Core\Actions\RecordDeploy;
 use G8Scope\Core\Actions\RevokeIngestKey;
 use G8Scope\Core\Models\Account;
+use G8Scope\Core\Models\IngestKey;
 use G8Scope\Core\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +51,9 @@ it('issues a prefixed key once, stores only its hash, and revokes it', function 
 
     [$key, $plain] = app(IssueIngestKey::class)($project, 'g8deck');
 
-    expect($plain)->toStartWith('g8s_')
+    expect($plain)->toStartWith('blip_')
+        ->and($key->prefix)->toBe('blip_')
+        ->and($key->fresh()->prefix)->toBe(IssueIngestKey::PREFIX)
         ->and($key->key_hash)->toBe(hash('sha256', $plain))
         ->and($key->last_four)->toBe(substr($plain, -4))
         ->and($key->toArray())->not->toHaveKey('key_hash');
@@ -61,6 +64,20 @@ it('issues a prefixed key once, stores only its hash, and revokes it', function 
     app(RevokeIngestKey::class)($key->fresh());
 
     expect($key->fresh()->revoked_at->equalTo($revokedAt))->toBeTrue();
+});
+
+it('keeps the legacy g8s_ prefix on keys stored without an explicit prefix', function (): void {
+    [$project] = app(CreateProject::class)(integrationAccount(), 'p');
+
+    // A row written before the prefix column existed: the migration default backfills it.
+    $legacy = IngestKey::create([
+        'project_id' => $project->id,
+        'name' => 'legacy',
+        'key_hash' => hash('sha256', 'g8s_legacy'),
+        'last_four' => 'gacy',
+    ]);
+
+    expect($legacy->fresh()->prefix)->toBe(IssueIngestKey::LEGACY_PREFIX)->toBe('g8s_');
 });
 
 it('archives a project, revokes its keys and frees the external_ref', function (): void {

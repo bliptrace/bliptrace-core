@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace G8Scope\Core\Observers;
 
+use G8Scope\Core\Actions\IssueIngestKey;
 use G8Scope\Core\Models\Endpoint;
-use G8Scope\Core\Models\IngestKey;
 use G8Scope\Core\Models\Project;
 use G8Scope\Core\Models\ProjectBinding;
-use Illuminate\Support\Str;
 
 /**
  * Spec §18: Project created → provision the default (shared) endpoint binding and
@@ -18,13 +17,7 @@ class ProjectObserver
 {
     public function created(Project $project): void
     {
-        $plain = Str::random(40);
-        IngestKey::create([
-            'project_id' => $project->id,
-            'name' => 'default',
-            'key_hash' => hash('sha256', $plain),
-            'last_four' => substr($plain, -4),
-        ]);
+        app(IssueIngestKey::class)($project, 'default');
 
         $api = Endpoint::firstOrCreate(
             ['account_id' => $project->account_id, 'kind' => 'api', 'type' => 'shared'],
