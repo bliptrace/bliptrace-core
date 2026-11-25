@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace G8Scope\Core\Billing;
 
 use G8Scope\Core\Actions\GrantCapability;
+use G8Scope\Core\Actions\RevokeSeats;
 use G8Scope\Core\Contracts\BillingProvider;
 use G8Scope\Core\Models\BillingEvent;
 use Stripe\Checkout\Session;
+use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\StripeClient;
+use Stripe\Subscription;
 use Stripe\Webhook;
 
 /**
- * Stripe billing driver (spec §12–13, #82). One-time, permanent capability unlock
- * via Stripe Checkout in `mode=payment` — no subscriptions. International-first:
- * currency, locale and tax follow the Stripe Price + Checkout session, so nothing
- * here is region-specific. A successful, verified webhook grants the capability.
+ * Stripe billing driver (spec §12–13, #82, ADR-002). Stripe is the only gateway and
+ * prices are in USD. Endpoint unlocks are one-time, permanent Checkout purchases
+ * (`mode=payment`); seats are a recurring Stripe subscription (`mode=subscription`,
+ * no Cashier). Currency and tax follow the Stripe Price + Checkout session. A paid,
+ * verified checkout grants the capability; a deleted seat subscription revokes it.
  */
 class StripeBillingProvider implements BillingProvider
 {
@@ -31,6 +35,7 @@ class StripeBillingProvider implements BillingProvider
         private readonly ?string $cancelUrl,
         private readonly GrantCapability $grant,
         private readonly bool $taxEnabled = false,
+        private readonly RevokeSeats $revokeSeats = new RevokeSeats,
     ) {}
 
     /**
@@ -65,28 +70,42 @@ class StripeBillingProvider implements BillingProvider
         // unlocks are always a single purchase.
         $quantity = $capability === 'seats' ? max(1, $quantity) : 1;
 
+        return $this->stripe->checkout->sessions->create($this->sessionParams($accountId, $capability, $quantity, $price))->url;
+    }
+
+    /**
+     * Checkout session parameters. Seats need a recurring Stripe Price and run as a
+     * subscription; endpoint unlocks need a one-time Price and run as a payment.
+     *
+     * @return array<string, mixed>
+     */
+    public function sessionParams(int $accountId, string $capability, int $quantity, string $price): array
+    {
         $metadata = [
             'account_id' => (string) $accountId,
             'capability' => $capability,
             'quantity' => (string) $quantity,
         ];
+        $subscription = $capability === 'seats';
 
         $params = [
-            'mode' => 'payment',
+            'mode' => $subscription ? 'subscription' : 'payment',
             'line_items' => [['price' => $price, 'quantity' => $quantity]],
             'success_url' => (string) ($this->successUrl ?: ''),
             'cancel_url' => (string) ($this->cancelUrl ?: ''),
             'client_reference_id' => (string) $accountId,
             'metadata' => $metadata,
-            // Mirror onto the PaymentIntent so the metadata survives async events too.
-            'payment_intent_data' => ['metadata' => $metadata],
         ];
+
+        // Mirror the metadata onto the object Stripe keeps, so later events carry it:
+        // the Subscription (needed to revoke seats on cancel) or the PaymentIntent.
+        $params[$subscription ? 'subscription_data' : 'payment_intent_data'] = ['metadata' => $metadata];
 
         if ($this->taxEnabled) {
             $params['automatic_tax'] = ['enabled' => true];
         }
 
-        return $this->stripe->checkout->sessions->create($params)->url;
+        return $params;
     }
 
     /**
@@ -99,6 +118,10 @@ class StripeBillingProvider implements BillingProvider
     public function handleWebhook(string $payload, string $signature): bool
     {
         $event = Webhook::constructEvent($payload, $signature, (string) $this->webhookSecret);
+
+        if ($event->type === 'customer.subscription.deleted') {
+            return $this->revokeSeatsFor($event);
+        }
 
         if ($event->type !== 'checkout.session.completed') {
             return false;
@@ -137,6 +160,38 @@ class StripeBillingProvider implements BillingProvider
         }
 
         ($this->grant)($accountId, $capability, $quantity);
+
+        $ledger->forceFill(['processed_at' => now()])->save();
+
+        return true;
+    }
+
+    /**
+     * A seat subscription ended (cancelled, or unpaid after Stripe's retries):
+     * take its seats back exactly once. Returns true when seats were revoked.
+     */
+    private function revokeSeatsFor(Event $event): bool
+    {
+        /** @var Subscription $subscription */
+        $subscription = $event->data->object;
+
+        $accountId = (int) ($subscription->metadata->account_id ?? 0);
+        $quantity = max(1, (int) ($subscription->metadata->quantity ?? 1));
+
+        if ($accountId <= 0 || ($subscription->metadata->capability ?? null) !== 'seats') {
+            return false;
+        }
+
+        $ledger = BillingEvent::firstOrCreate(
+            ['provider' => 'stripe', 'event_id' => $event->id],
+            ['account_id' => $accountId, 'capability' => 'seats', 'quantity' => $quantity],
+        );
+
+        if (! $ledger->wasRecentlyCreated) {
+            return false;
+        }
+
+        ($this->revokeSeats)($accountId, $quantity);
 
         $ledger->forceFill(['processed_at' => now()])->save();
 
