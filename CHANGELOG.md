@@ -4,6 +4,17 @@ All notable changes to `g8scope/core` will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-11-25
+
+### Changed
+- Seats are sold as a Stripe subscription: `StripeBillingProvider` opens Checkout in `mode=subscription` for
+  `seats` (metadata mirrored onto the Subscription); endpoint unlocks stay one-time `mode=payment` (ADR-002:
+  Stripe only, USD). `STRIPE_PRICE_SEAT` must now be a **recurring** USD Price.
+
+### Added
+- `RevokeSeats` action and handling for `customer.subscription.deleted`: seats bought through the subscription
+  are taken back once (idempotent via `billing_events`), never below the owner's seat.
+
 ## [0.3.3] - 2026-11-23
 
 ### Changed

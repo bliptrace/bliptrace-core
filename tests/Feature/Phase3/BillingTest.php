@@ -143,3 +143,70 @@ it('ignores an unpaid checkout session', function (): void {
 it('returns null checkout url when no price is configured', function (): void {
     expect(stripeProvider([])->checkoutUrl(1, 'custom_api'))->toBeNull();
 });
+
+// --- Seat subscriptions (ADR-002) --------------------------------------------
+
+/** Build a customer.subscription.deleted payload + a valid Stripe signature header. */
+function signedSubscriptionDeleted(int $accountId, int $quantity, string $eventId = 'evt_sub_del', string $capability = 'seats'): array
+{
+    $payload = json_encode([
+        'id' => $eventId,
+        'object' => 'event',
+        'type' => 'customer.subscription.deleted',
+        'data' => ['object' => [
+            'object' => 'subscription',
+            'status' => 'canceled',
+            'metadata' => ['account_id' => (string) $accountId, 'capability' => $capability, 'quantity' => (string) $quantity],
+        ]],
+    ], JSON_THROW_ON_ERROR);
+
+    $timestamp = time();
+    $signature = hash_hmac('sha256', "{$timestamp}.{$payload}", WEBHOOK_SECRET);
+
+    return [$payload, "t={$timestamp},v1={$signature}"];
+}
+
+it('sells seats as a subscription and unlocks as a one-time payment', function (): void {
+    $provider = stripeProvider();
+
+    $seats = $provider->sessionParams(7, 'seats', 3, 'price_seat');
+    $unlock = $provider->sessionParams(7, 'custom_api', 1, 'price_api');
+
+    expect($seats['mode'])->toBe('subscription')
+        ->and($seats['subscription_data']['metadata'])->toBe(['account_id' => '7', 'capability' => 'seats', 'quantity' => '3'])
+        ->and($seats)->not->toHaveKey('payment_intent_data')
+        ->and($unlock['mode'])->toBe('payment')
+        ->and($unlock['payment_intent_data']['metadata']['capability'])->toBe('custom_api')
+        ->and($unlock)->not->toHaveKey('subscription_data');
+});
+
+it('revokes seats once when the seat subscription is deleted', function (): void {
+    $account = billingAccount();
+    $account->entitlement()->create(['seats' => 6]);
+    [$payload, $signature] = signedSubscriptionDeleted($account->id, 4);
+    $provider = stripeProvider();
+
+    expect($provider->handleWebhook($payload, $signature))->toBeTrue()
+        ->and($provider->handleWebhook($payload, $signature))->toBeFalse()
+        ->and(Entitlement::where('account_id', $account->id)->value('seats'))->toBe(2)
+        ->and(BillingEvent::where('event_id', 'evt_sub_del')->whereNotNull('processed_at')->exists())->toBeTrue();
+});
+
+it('never revokes the owner seat', function (): void {
+    $account = billingAccount();
+    $account->entitlement()->create(['seats' => 2]);
+    [$payload, $signature] = signedSubscriptionDeleted($account->id, 5, 'evt_floor');
+
+    stripeProvider()->handleWebhook($payload, $signature);
+
+    expect(Entitlement::where('account_id', $account->id)->value('seats'))->toBe(1);
+});
+
+it('ignores a deleted subscription that is not for seats', function (): void {
+    $account = billingAccount();
+    $account->entitlement()->create(['seats' => 3]);
+    [$payload, $signature] = signedSubscriptionDeleted($account->id, 1, 'evt_other', 'custom_api');
+
+    expect(stripeProvider()->handleWebhook($payload, $signature))->toBeFalse()
+        ->and(Entitlement::where('account_id', $account->id)->value('seats'))->toBe(3);
+});

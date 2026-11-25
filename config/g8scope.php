@@ -17,7 +17,7 @@ return [
         'occurrence_store' => null, // implements G8Scope\Core\Contracts\OccurrenceStore (Postgres)
         'endpoint_resolver' => null,
         'entitlement_gate' => null,
-        // BillingProvider: 'stripe' selects the Stripe one-time Checkout driver;
+        // BillingProvider: 'stripe' selects the Stripe Checkout driver (ADR-002);
         // anything else (or unset) falls back to ManualBillingProvider (admin unlock).
         'billing_provider' => env('BLIPTRACE_BILLING_DRIVER', env('G8SCOPE_BILLING_DRIVER')) === 'stripe'
             ? StripeBillingProvider::class
@@ -44,15 +44,15 @@ return [
         'mcp' => env('BLIPTRACE_MCP_URL', env('G8SCOPE_MCP_URL', 'https://mcp.scope.g8suite.com')),
     ],
 
-    // Billing (BillingProvider driver) — spec §12–13. One-time, permanent
-    // capability unlock via Stripe Checkout (mode=payment). International-first:
-    // currency/locale are driven by the Stripe Price + Checkout, not configured here.
+    // Billing (BillingProvider driver) — spec §12–13, ADR-002: Stripe is the only
+    // gateway, prices in USD. Endpoint unlocks are one-time (mode=payment); seats
+    // are a Stripe subscription (mode=subscription). Currency comes from the Price.
     'billing' => [
         'stripe' => [
             'secret' => env('STRIPE_SECRET'),
             'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
-            // One-time Stripe Price IDs per purchasable capability. A null/empty
-            // price means that capability is unlocked manually (no online checkout).
+            // Stripe Price IDs per capability: one-time USD Prices for custom_api /
+            // custom_mcp, a recurring USD Price for seats. Null/empty = manual unlock.
             'prices' => [
                 'custom_api' => env('STRIPE_PRICE_CUSTOM_API'),
                 'custom_mcp' => env('STRIPE_PRICE_CUSTOM_MCP'),
